@@ -1,0 +1,26 @@
+/* product.css */
+
+/* Optional hero section override */
+.product-hero {
+    background-color: #f2f2f2;
+    text-align: center;
+    padding: 80px 20px;
+  }
+  
+  /* Example styling for a "Featured Items" heading */
+  .product-featured-heading {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  
+  /* Example override for product boxes if you want them bigger here */
+  .product-grid .product-box {
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .product-grid .product-box:hover {
+    transform: scale(1.03);
+    box-shadow: var(--shadow);
+  }
+  

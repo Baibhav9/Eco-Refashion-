@@ -1,0 +1,81 @@
+.seller-product-list {
+    padding: 60px 0;
+    background-color: #fff;
+  }
+  
+  .seller-product-list .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .seller-product-list h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+    color: #333;
+  }
+  
+  .seller-product-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+  }
+  
+  .seller-product-list table thead {
+    background-color: var(--primary-color);
+    color: #fff;
+  }
+  
+  .seller-product-list table th,
+  .seller-product-list table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+    font-size: 16px;
+  }
+  
+  .seller-product-list table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .seller-product-list table tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .seller-product-list table,
+    .seller-product-list table thead,
+    .seller-product-list table tbody,
+    .seller-product-list table th,
+    .seller-product-list table td,
+    .seller-product-list table tr {
+      display: block;
+    }
+    
+    .seller-product-list table thead tr {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+    }
+    
+    .seller-product-list table tr {
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    
+    .seller-product-list table td {
+      border: none;
+      position: relative;
+      padding-left: 50%;
+    }
+    
+    .seller-product-list table td:before {
+      position: absolute;
+      left: 10px;
+      top: 12px;
+      font-weight: bold;
+    }
+  }
+  

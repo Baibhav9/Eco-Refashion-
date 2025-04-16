@@ -1,0 +1,64 @@
+/* Organization Dashboard Styles */
+.org-dashboard {
+    padding: 60px 0;
+    background-color: #f5f5f5;
+  }
+  
+  .org-dashboard .container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+  }
+  
+  .org-dashboard h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 28px;
+    color: var(--primary-color);
+  }
+  
+  .org-dashboard p {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 16px;
+  }
+  
+  .org-dashboard table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .org-dashboard table thead th {
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding: 12px 8px;
+    text-align: left;
+  }
+  
+  .org-dashboard table tbody td {
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 8px;
+    font-size: 14px;
+  }
+  
+  .org-dashboard table tbody tr:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .org-dashboard form button.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .org-dashboard form button.btn-primary:hover {
+    background-color: #000;
+  }
+  

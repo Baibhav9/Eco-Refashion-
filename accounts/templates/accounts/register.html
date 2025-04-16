@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<section class="register-section">
+  <div class="container">
+    <h2>Register</h2>
+    <form method="POST">
+      {% csrf_token %}
+      {{ form.as_ul }}
+      <button type="submit" class="btn-primary">Sign Up</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

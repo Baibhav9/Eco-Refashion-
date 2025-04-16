@@ -1,0 +1,56 @@
+.logout-confirmation {
+    background-color: #f5f5f5;
+    padding: 60px 0;
+  }
+  
+
+  .logout-confirmation .container {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+
+  .logout-confirmation h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+
+  .logout-confirmation p {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #555;
+  }
+  
+
+  .logout-confirmation form {
+    margin-bottom: 20px;
+  }
+  
+
+  .btn-primary {
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+  }
+  
+  .btn-primary:hover {
+    background-color: #333;
+  }
+  
+  .logout-confirmation a {
+    color: var(--primary-color);
+    text-decoration: underline;
+  }
+  

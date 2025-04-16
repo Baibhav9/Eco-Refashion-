@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'base.css' %}">
+<link rel="stylesheet" href="{% static 'index.css' %}">
+{% block title %}Home - ECO Refashion{% endblock %}
+
+{% block extra_css %}
+<!-- If you want a unique stylesheet for the index, include it here -->
+<!-- e.g. <link rel="stylesheet" href="{% static 'index.css' %}"> -->
+{% endblock %}
+
+{% block content %}
+<!-- Keep the sections and classes so your existing CSS (home.css, etc.) still applies -->
+
+<section class="top-section">
+  <div class="container">
+    <h1 class="top-title">Elevate Your Style</h1>
+    <p class="top-subtitle">Timeless Fashion, Sustainable Choices</p>
+    <!-- Direct “Shop Now” to thrift or anywhere you like -->
+    <a href="{% url 'product' %}" class="btn-primary">Shop Now</a>
+  </div>
+</section>
+
+{% endblock %}
