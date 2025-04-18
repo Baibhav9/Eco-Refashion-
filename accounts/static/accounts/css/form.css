@@ -1,0 +1,158 @@
+.form-section {
+    padding: 80px 20px;
+    background-color: #f9f9f9;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 800px;
+    background-color: var(--white);
+    padding: 50px 40px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.form-container form > div {
+    margin-bottom: 8px;
+}
+
+.form-title {
+    margin-bottom: 30px;
+    font-size: 30px;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form .btn-primary {
+    margin-top: 0;
+}
+
+form p {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+/* Universal input styling */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="file"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    margin-top: 4px;
+    background-color: var(--white);
+    color: var(--text-color);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Focus states */
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(74, 157, 91, 0.2);
+}
+
+/* Select dropdown */
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg fill='%234a9d5b' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px 16px;
+}
+
+/* Textarea specific */
+textarea {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+/* File input improvements */
+input[type="file"] {
+    padding: 10px;
+    font-size: 15px;
+    background-color: #fafafa;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* Submit Button */
+.btn-primary {
+    margin-top: 25px;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 8px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #000;
+}
+
+/* Form Footer */
+.form-footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 14px;
+}
+
+.form-footer a {
+    color: var(--primary-color);
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.form-footer a:hover {
+    color: var(--text-color);
+}
+
+/* Responsive Tweaks */
+@media (max-width: 576px) {
+    .form-container {
+        padding: 30px 20px;
+    }
+
+    .form-title {
+        font-size: 24px;
+    }
+
+    .btn-primary {
+        padding: 12px;
+    }
+}

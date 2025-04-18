@@ -10,7 +10,6 @@ class CustomUser(AbstractUser):
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
 
-    
     def save(self, *args, **kwargs):
         if self.role == 'admin':
             self.is_staff = True

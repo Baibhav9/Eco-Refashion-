@@ -1,9 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'main/base.html' %}
 {% load static %}
 
 {% block title %}Organization Dashboard - ECO Refashion{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'base.css' %}">
+<link rel="stylesheet" href="{% static 'main/css/base.css' %}">
 <link rel="stylesheet" href="{% static 'organization_dash.css' %}">
 {% endblock %}
 {% block content %}
@@ -31,7 +31,7 @@
             <td>{{ item.user.username }}</td>
             <td>{{ item.status }}</td>
             <td>
-              <form method="POST" action="{% url 'confirm_cloth_upload' item.id %}">
+              <form method="POST" action="{% url 'main:confirm_cloth_upload' item.id %}">
                 {% csrf_token %}
                 <button type="submit" class="btn-primary">Confirm</button>
               </form>

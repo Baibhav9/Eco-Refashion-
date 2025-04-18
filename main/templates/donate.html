@@ -1,11 +1,10 @@
-{% extends 'base.html' %}
+{% extends 'main/base.html' %}
 {% load static %}
 
 {% block title %}Donate - ECO Refashion{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'base.css' %}">
-<link rel="stylesheet" href="{% static 'donate.css' %}">
+<link rel="stylesheet" href="{% static 'main/css/donate.css' %}">
 {% endblock %}
 
 
@@ -16,7 +15,7 @@
     <div class="container">
       <h1 class="top-title">Elevate Your Style</h1>
       <p class="top-subtitle">Timeless Fashion, Sustainable Choices</p>
-      <a href="{% url 'product' %}" class="btn-primary">Shop Now</a>
+      <a href="{% url 'main:product' %}" class="btn-primary">Shop Now</a>
     </div>
   </section>
 
@@ -49,7 +48,7 @@
         
         <div class="donation-cta">
           <h3>Ready to donate?</h3>
-          <a href="{% url 'user_upload_donate' %}" class="btn-primary">Upload Clothes for Donation</a>
+          <a href="{% url 'main:user_upload_donate' %}" class="btn-primary">Upload Clothes for Donation</a>
         </div>
       </div>
     </div>

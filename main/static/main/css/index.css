@@ -1,0 +1,48 @@
+
+  /* If the home page shows products (featured items, etc.) */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .product-box {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+    color: black;
+    transition: 0.3s;
+  }
+  
+  .product-box:hover {
+    transform: scale(1.05);
+  }
+  
+  .product-box img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+  
+  /* Media queries specific to your home page hero, etc. */
+  @media (max-width: 768px) {
+    .top-title {
+      font-size: 36px;
+    }
+  
+    .top-subtitle {
+      font-size: 18px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .top-title {
+      font-size: 28px;
+    }
+  }
+  

@@ -1,12 +1,12 @@
 from django.contrib import admin
-from .models import ClothUpload, SellerProduct, RentalRequest, Cart, Product
+from .models import SellerProduct, UserProduct, RentalRequest, Cart, Product, Order, OrderItem
 from django.shortcuts import render
 
 class SellerProductAdmin(admin.ModelAdmin):
-    list_display = ('title', 'seller', 'category', 'status', 'price', 'created_at')
+    list_display = ('title', 'user', 'category', 'status', 'price', 'created_at')
     list_filter = ('status', 'category', 'created_at')
-    list_editable = ('price',)  # Allows direct editing in list view
-    search_fields = ('title', 'seller__username', 'description')
+    list_editable = ('price',)
+    search_fields = ('title', 'user__username', 'description')
     actions = ['approve_products', 'reject_products']
     readonly_fields = ('created_at',)  # Make creation timestamp non-editable
 
@@ -45,9 +45,9 @@ class SellerProductAdmin(admin.ModelAdmin):
                         {'products': queryset})
     reject_products.short_description = "Reject selected products"
 
-class ClothUploadAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'status', 'upload_type', 'created_at')
-    list_filter = ('status', 'upload_type')
+class UserProductAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'status', 'category', 'created_at')
+    list_filter = ('status', 'category')
     actions = ['approve_products']
 
     def approve_products(self, request, queryset):
@@ -65,5 +65,7 @@ class ClothUploadAdmin(admin.ModelAdmin):
 
 #Admin classes
 admin.site.register(SellerProduct, SellerProductAdmin)
-admin.site.register(ClothUpload, ClothUploadAdmin)
+admin.site.register(UserProduct, UserProductAdmin)
 admin.site.register(Cart)
+admin.site.register(Order)
+admin.site.register(OrderItem)

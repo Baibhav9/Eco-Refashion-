@@ -1,11 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'main/base.html' %}
 {% load static %}
 
 {% block title %}Thrift - ECO Refashion{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'base.css' %}">
-<link rel="stylesheet" href="{% static 'thrift.css' %}">
+<link rel="stylesheet" href="{% static 'main/css/base.css' %}">
+<link rel="stylesheet" href="{% static 'main/css/thrift.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -15,7 +15,7 @@
     <div class="container">
       <h1 class="top-title">Elevate Your Style</h1>
       <p class="top-subtitle">Timeless Fashion, Sustainable Choices</p>
-      <a href="{% url 'product' %}" class="btn-primary">Shop Now</a>
+      <a href="{% url 'main:product' %}" class="btn-primary">Shop Now</a>
     </div>
   </section>
 
@@ -23,7 +23,7 @@
   <section class="section products-section">
     <div class="container">
       <div class="product-grid" id="productGrid">
-        <a href="{% url 'user_upload_thrift' %}" class="btn-primary">Upload Clothes for Thrift</a>
+        <a href="{% url 'main:user_upload_thrift' %}" class="btn-primary">Upload Clothes for Thrift</a>
       </div>
     </div>
   </section>

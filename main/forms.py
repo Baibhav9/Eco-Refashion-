@@ -1,5 +1,6 @@
 from django import forms
-from .models import SellerProduct, ClothUpload
+from .models import SellerProduct, UserProduct, Order
+
 
 class SellerProductForm(forms.ModelForm):
     class Meta:
@@ -13,9 +14,13 @@ class SellerProductForm(forms.ModelForm):
             'color',
             'price'
         ]
-class ClothUploadForm(forms.ModelForm):
+        labels = {
+            "image": "Image",
+        }
+
+class UserProductForm(forms.ModelForm):
     class Meta:
-        model = ClothUpload
+        model = UserProduct
         fields = ['title', 'description', 'image']
 
     def clean(self):
@@ -24,3 +29,8 @@ class ClothUploadForm(forms.ModelForm):
         if cleaned_data.get('is_rentable') and cleaned_data.get('rental_duration') > 7:
             raise forms.ValidationError("Rental duration cannot exceed 7 days.")
         return cleaned_data
+
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ["payment_method", "total_amount"]

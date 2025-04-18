@@ -1,0 +1,53 @@
+<nav class="navbar">
+    <div class="nav-container">
+        <!-- Link to home page -->
+        <a href="{% url 'main:index' %}" class="nav-logo">ECO Refashion</a>
+
+        <div class="nav-menu">
+            {% if user.is_authenticated %}
+                <p>Logged in: True; Role: {{ user.role }}; Username: {{ user.username }}</p>
+            {% else %}
+                <p>Logged in: False</p>
+            {% endif %}
+            {% if user.is_authenticated and user.role == 'user' %}
+                <div class="nav-links">
+                    <a href="{% url 'main:product' %}">Products</a>
+                    <a href="{% url 'main:donate' %}">Donate</a>
+                    <a href="{% url 'main:thrift' %}">Thrift</a>
+                    <a href="{% url 'main:recycle' %}">Recycle</a>
+                    <a href="{% url 'main:renting' %}">Renting</a>
+                </div>
+            {% endif %}
+
+            {% if user.is_authenticated and user.role == 'seller' %}
+                <div class="nav-seller nav-links">
+                    <a href="{% url 'main:seller_upload_product' %}">Upload Product</a>
+                    <a href="{% url 'main:seller_product_list' %}">My Products</a>
+                </div>
+            {% endif %}
+
+            {% if user.is_authenticated and user.role == 'admin' %}
+                <div class="admin-nav nav-links">
+                    <a href="{% url 'main:admin_product_approval' %}">Approve Products</a>
+                    <a href="{% url 'main:admin_cart_list' %}">Cart Items</a>
+                    <a href="{% url 'main:admin_rental_approval' %}">Renting Uploads</a>
+                </div>
+            {% endif %}
+
+            {% if user.is_authenticated and user.role == 'organization' %}
+                <a href="{% url 'main:organization_dashboard' %}">Org Dashboard</a>
+            {% endif %}
+        </div>
+
+        <div class="nav-icons">
+            {% if user.is_authenticated and user.role == 'user' %}
+                <a href="{% url 'main:cart' %}" class="icon-button">🛒</a>
+            {% endif %}
+            <a href="{% url 'accounts:login' %}" class="icon-button">👤</a>
+            <div class="divider"></div>
+            {% if user.is_authenticated and user.role == 'user' %}
+                <a href="{% url 'main:user_dashboard' %}" class="icon-button">=</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
