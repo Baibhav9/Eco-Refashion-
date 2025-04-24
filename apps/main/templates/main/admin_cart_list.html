@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin - Cart Items{% endblock %}
+\
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'main/css/base.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="admin-dashboard">
+  <div class="container">
+    <h2>Cart Items</h2>
+    {% if cart_items %}
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Product Title</th>
+            <th>Quantity</th>
+            <th>Added At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cart_items %}
+          <tr>
+            <td>{{ item.user.username }}</td>
+            <td>{{ item.product.title }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.added_at|date:"M d, Y H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No cart items found.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

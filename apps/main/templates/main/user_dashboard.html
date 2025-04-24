@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Your Dashboard - ECO Refashion{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'main/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'main/css/user_dashboard.css' %}">
+
+{% endblock %}
+{% block content %}
+    <section class="user-dashboard">
+        <div class="container">
+            <h2 class="section-title">Your Dashboard</h2>
+            <p class="section-description">Here are the items you have uploaded that are awaiting approval:</p>
+
+            {% if object_list %}
+                <table class="uploads-table">
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Image</th>
+                        <th>Status</th>
+                        <th>Upload Type</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for upload in object_list %}
+                        <tr>
+                            <td>{{ upload.title }}</td>
+                            <td>{{ upload.description }}</td>
+                            <td>
+                                {% if upload.image %}
+                                    <img src="{{ upload.image.url }}" alt="{{ upload.title }}">
+                                {% else %}
+                                    <p>No image available</p>
+                                {% endif %}
+                            </td>
+                            <td>{{ upload.status }}</td>
+                            <td>{{ upload.category }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No uploads found. Please upload items for donation, recycle, or thrift.</p>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

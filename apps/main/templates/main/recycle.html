@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recycle - ECO Refashion{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'main/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'main/css/recycle.css' %}">
+    <style>
+        .btn-primary {
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #004d40;
+        }
+
+        .section {
+            padding: 60px 20px;
+            background-color: #fafafa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: #00796b;
+            margin-bottom: 1rem;
+        }
+
+        .section-description {
+            font-size: 1rem;
+            color: #555;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .info-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            width: 250px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: left;
+        }
+
+        .info-card h3 {
+            color: #00796b;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-card p {
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .recycle-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .recycle-item {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .recycle-item img {
+            max-width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .recycle-item h4 {
+            font-size: 1rem;
+            color: #333;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <section class="top-section">
+        <div class="container">
+            <h1 class="top-title">Recycle for a Better Tomorrow</h1>
+            <p class="top-subtitle">Reduce waste, restore value, and redefine fashion.</p>
+            <a href="{% url 'main:product' %}" class="btn-primary">Shop Now</a>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="mission-section" style="text-align: center;">
+                <h2 class="section-title">Why Recycle Clothes?</h2>
+                <div class="info-cards">
+                    <div class="info-card">
+                        <h3>🌎 Environmental Impact</h3>
+                        <p>Reduce textile waste that pollutes landfills and saves valuable resources.</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>♻️ Give Clothes a New Life</h3>
+                        <p>Old clothes can be transformed into useful items or donated for reuse.</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>🌱 Circular Economy</h3>
+                        <p>Support a sustainable loop where nothing goes to waste unnecessarily.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="donate-section">
+                <div class="image-placeholder"></div>
+                <p style="margin-bottom: 2rem;">Join us in creating a cleaner planet—recycle your unused or damaged clothing today.</p>
+                <a href="{% url 'main:user_upload_recycle' %}" class="btn-primary">Upload Clothes for Recycle</a>
+            </div>
+
+            <div class="recycle-items">
+                {% for item in recycle_items %}
+                    <div class="recycle-item">
+                        <img src="{{ item.image_url }}" alt="Cloth Image">
+                        <h4>{{ item.title }}</h4>
+                    </div>
+                {% empty %}
+                    <p>No items available for recycling at the moment.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

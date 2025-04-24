@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin - Product Approval{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block content %}
+    <section class="admin-dashboard">
+        <div class="container">
+            <h2 class="section-title">Product & Rent Approval</h2>
+            {% if object_list %}
+                <div class="table-wrapper">
+                    <table class="styled-table">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Seller</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for product in object_list %}
+                            <tr>
+                                <td>{{ product.title }}</td>
+                                <td>{{ product.get_category_display }}</td>
+                                <td>{{ product.user.username }}</td>
+                                <td>{{ product.status|title }}</td>
+                                <td>
+                                    {% if product.status == 'pending' %}
+                                        <form method="POST" action="{% url 'main:confirm_product' product.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-primary">Approve</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="no-products-msg">No pending items for approval.</p>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

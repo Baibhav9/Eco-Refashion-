@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Correct usage of meta tags in HTML5 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ECO Refashion{% endblock %}</title>
+
+
+    <link rel="stylesheet" href="{% static 'main/css/base.css' %}"/>
+    <link rel="stylesheet" href="{% static 'main/css/nav.css' %}"/>
+    <link rel="stylesheet" href="{% static 'main/css/table.css' %}"/>
+    <link rel="stylesheet" href="{% static 'accounts/css/form.css' %}"/>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href={% static 'images/favicon/favicon-32x32.png' %}>
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon/favicon-16x16.png' %}">
+    <link rel="manifest" href="{% static 'images/favicon/site.webmanifest' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+<!-- Navigation -->
+{% include "includes/navbar.html" %}
+
+{% include 'includes/messages.html' %}
+
+<!-- Main content from child templates goes here -->
+<main>
+    {% block content %}
+    {% endblock %}
+</main>
+
+{% include "includes/footer.html" %}
+
+<!-- Scripts -->
+<script src="{% static 'main/js/script.js' %}"></script>
+</body>
+</html>

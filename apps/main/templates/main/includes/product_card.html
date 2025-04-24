@@ -1,0 +1,31 @@
+<div class="product-card">
+    <div class="product-image-container">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.title }}" class="product-image">
+        {% else %}
+            <div class="no-image">No image available</div>
+        {% endif %}
+        <div class="product-badge">For Sale</div>
+    </div>
+
+    <div class="product-details">
+        <h3 class="product-title">{{ product.title }}</h3>
+        <p class="product-description">{{ product.description|truncatechars:100 }}</p>
+
+        <div class="product-meta">
+            <span class="price">Rs. {{ product.price }}</span>
+            {% if product.available_size %}
+                <span class="size">Size: {{ product.available_size }}</span>
+            {% endif %}
+        </div>
+
+        <div class="seller-info">
+            <span class="seller-label">Sold by:</span>
+            <span class="seller-name">{{ product.seller.username }}</span>
+        </div>
+
+        <a class="add-to-cart" style="text-align: center;" href="{% url 'main:cart_action_with_id' 'add' product.id %}">
+            Add to Cart
+        </a>
+    </div>
+</div>

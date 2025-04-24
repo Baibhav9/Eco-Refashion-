@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Uploaded Products{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'main/css/seller_product_list.css' %}">
+{% endblock %}
+
+{% block content %}
+    <section class="seller-product-list">
+        <div class="container">
+            <h2 class="section-title">My Uploaded Products</h2>
+
+            {% if object_list %}
+                <div class="table-wrapper">
+                    <table class="styled-table">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Uploaded At</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for product in object_list %}
+                            <tr>
+                                <td>{{ product.title }}</td>
+                                <td>{{ product.get_category_display }}</td>
+                                <td>{{ product.status|title }}</td>
+                                <td>{{ product.created_at|date:"Y-m-d H:i" }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="no-products-msg">You haven't uploaded any products yet.</p>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

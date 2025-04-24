@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Renting - ECO Refashion{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'main/css/product.css' %}">
+{% endblock %}
+
+{% block content %}
+    <main>
+        <!-- Hero Section -->
+        <section class="top-section">
+            <div class="container">
+                <h1 class="top-title">Rent Your Style</h1>
+                <p class="top-subtitle">Sustainable Fashion, Borrowed with Ease</p>
+                <a href="#rental-items" class="btn-primary">Explore Rentals</a>
+            </div>
+        </section>
+
+        <!-- How Renting Works Section -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">How Renting Works</h2>
+                <p class="section-description">
+                    Select items you love, rent them for a set period, and return them when you're done –
+                    reducing waste while always keeping your wardrobe fresh.
+                </p>
+                <div class="steps-container">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Choose Your Outfit</h3>
+                        <p>Pick from our rotating collection of trendy clothing.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Rent for a Period</h3>
+                        <p>Select the timeframe that suits you.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Return & Repeat</h3>
+                        <p>Return the items, and pick out something new!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Renting Items Section -->
+        <section class="section" id="rental-items">
+            <div class="container">
+                <h2 class="section-title">Items Available for Rent</h2>
+
+                {% if object_list %}
+                    <div class="product-grid">
+                        {% for item in object_list %}
+                            {% include 'main/includes/product_card.html' with product=item %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-items">
+                        <p>No rental items available at the moment. Please check back later.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+{% endblock %}

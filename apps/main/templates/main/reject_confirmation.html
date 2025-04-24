@@ -1,0 +1,45 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'main/css/../static/main/css/base.css' %}">
+<link rel="stylesheet" href="{% static 'main/css/../static/main/css/reject_confirmation.css' %}">
+{% endblock %}
+
+<div class="content">
+    <h1>Confirm Product Rejection</h1>
+    <p>You are about to reject the following products:</p>
+    
+    <table class="reject-confirm-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Seller</th>
+                <th>Category</th>
+                <th>Current Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.id }}</td>
+                <td>{{ product.title }}</td>
+                <td>{{ product.seller.username }}</td>
+                <td>{{ product.get_category_display }}</td>
+                <td>{{ product.get_status_display }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="confirmation-buttons">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="confirm" value="yes">
+            <button type="submit" class="button reject-button">Confirm Rejection</button>
+            <a href="{% url 'admin:main_sellerproduct_changelist' %}" class="button cancel-button">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

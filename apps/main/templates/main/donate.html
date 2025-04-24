@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Donate - ECO Refashion{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'main/css/donate.css' %}">
+{% endblock %}
+
+
+{% block content %}
+<main>
+  <!-- Top Section -->
+  <section class="top-section">
+    <div class="container">
+      <h1 class="top-title">Elevate Your Style</h1>
+      <p class="top-subtitle">Timeless Fashion, Sustainable Choices</p>
+      <a href="{% url 'main:product' %}" class="btn-primary">Shop Now</a>
+    </div>
+  </section>
+
+  <!-- Donation Info Section -->
+  <section class="section">
+    <div class="container">
+      <div class="info-container">
+        <h2 class="section-title">How to Donate</h2>
+        <p class="section-description">
+          Your unwanted clothes can make a difference. Here's how you can donate:
+        </p>
+        
+        <div class="steps-container">
+          <div class="step">
+            <div class="step-number">1</div>
+            <h3>Clean Your Clothes</h3>
+            <p>Make sure your clothes are washed and in good condition.</p>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <h3>Pack Them Up</h3>
+            <p>Pack your clothes in a bag or box.</p>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <h3>Drop Off or Schedule Pickup</h3>
+            <p>Bring them to our drop-off locations or schedule a pickup.</p>
+          </div>
+        </div>
+        
+        <div class="donation-cta">
+          <h3>Ready to donate?</h3>
+          <a href="{% url 'main:user_upload_donate' %}" class="btn-primary">Upload Clothes for Donation</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - ECO Refashion{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'accounts/css/form.css' %}">
+{% endblock %}
+
+{% block content %}
+    <section class="form-section">
+        <div class="form-container">
+            <h2 class="form-title">Login</h2>
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn-primary">Sign In</button>
+            </form>
+            <p class="form-footer">Don't have an account? <a href="{% url 'accounts:register' %}">Register here</a></p>
+        </div>
+    </section>
+{% endblock %}

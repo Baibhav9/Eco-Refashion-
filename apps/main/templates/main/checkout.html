@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Checkout{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'main/css/../../static/main/css/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="checkout-section">
+    <div class="container">
+        <h2>Checkout</h2>
+
+        {% if cart_items %}
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                <ul>
+                    {% for item in cart_items %}
+                        <li>
+                            {{ item.quantity }} × {{ item.product.title }} - Rs. {{ item.get_total_price }}
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p><strong>Total: Rs. {{ total }}</strong></p>
+            </div>
+
+            <form method="POST" action="{% url 'main:checkout' %}" class="payment-form">
+                {% csrf_token %}
+                <h3>Choose Payment Method</h3>
+
+                <input type="hidden" value="{{ total }}" name="total_amount" />
+
+                <div class="payment-options">
+                    <label>
+                        <input type="radio" name="payment_method" value="cod" checked>
+                        Cash on Delivery
+                    </label>
+                    <label>
+                        <input type="radio" name="payment_method" value="khalti">
+                        Khalti
+                    </label>
+                </div>
+                <button type="submit" class="btn-primary">Confirm Order</button>
+            </form>
+        {% else %}
+            <p>Your cart is empty.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

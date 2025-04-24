@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Products - ECO Refashion{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'main/css/product.css' %}">
+{% endblock %}
+
+{% block content %}
+    <section class="top-section">
+        <div class="container">
+            <h1 class="top-title">Our Products</h1>
+            <p class="top-subtitle">Shop Sustainable Fashion</p>
+            <div class="action-buttons">
+                <a href="{% url 'main:cart' %}" class="btn-primary">View Cart</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Quality Sustainable Products</h2>
+            <p class="section-description">
+                Discover our collection of approved sustainable fashion items available for purchase.
+                Each product has been carefully vetted by our team.
+            </p>
+        </div>
+    </section>
+
+    <section class="products-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Available Products</h2>
+                <div class="product-count">{{ products.count }} items available</div>
+            </div>
+
+            {% if products %}
+                <div class="product-grid">
+                    {% for product in products %}
+                        {% include 'main/includes/product_card.html' with product=product %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-products-message">
+                    <p>No approved products available at the moment.</p>
+                    <p>Please check back later or explore our <a href="{% url 'main:renting' %}">rental items</a>.</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

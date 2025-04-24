@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Logout Confirmation{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'accounts/css/logout.css' %}">
+{% endblock %}
+
+{% block content %}
+    <section class="logout-confirmation">
+        <div class="container">
+            <h2>You are currently logged in as {{ user.username }}</h2>
+            <p>If you wish to log out, please click the button below.</p>
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn-primary">Logout</button>
+            </form>
+            <p>If you do not want to log out, you can <a href="{% url 'main:index' %}">return home</a>.</p>
+        </div>
+    </section>
+{% endblock %}

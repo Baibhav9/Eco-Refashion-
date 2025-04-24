@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Organization Dashboard - ECO Refashion{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'main/css/../static/main/css/base.css' %}">
+<link rel="stylesheet" href="{% static 'organization_dash.css' %}">
+{% endblock %}
+{% block content %}
+<section class="org-dashboard">
+  <div class="container">
+    <h2>Organization Dashboard</h2>
+    <p>Below are the cloth uploads for Donation and Recycle awaiting confirmation:</p>
+
+    {% if cloth_uploads %}
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Uploaded By</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cloth_uploads %}
+          <tr>
+            <td>{{ item.title }}</td>
+            <td>{{ item.get_upload_type_display }}</td>
+            <td>{{ item.user.username }}</td>
+            <td>{{ item.status }}</td>
+            <td>
+              <form method="POST" action="{% url 'main:confirm_cloth_upload' item.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-primary">Confirm</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No cloth uploads awaiting confirmation.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

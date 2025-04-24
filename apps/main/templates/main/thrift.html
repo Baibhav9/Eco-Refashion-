@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Thrift - ECO Refashion{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'main/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'main/css/thrift.css' %}">
+
+    <style>
+        .product-intro {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #00796b;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            width: 250px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: left;
+        }
+
+        .info-card h3 {
+            color: #00796b;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-card p {
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .thrift-actions {
+            text-align: center;
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .thrift-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            padding-top: 1rem;
+        }
+
+        .thrift-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+            transition: transform 0.3s ease;
+        }
+
+        .thrift-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .thrift-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+
+        .thrift-details {
+            padding: 1rem;
+        }
+
+        .thrift-title {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .thrift-desc {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 0.75rem;
+        }
+
+        .thrift-price {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #00796b;
+        }
+
+        .no-items {
+            text-align: center;
+            color: #888;
+            font-size: 1rem;
+            padding: 2rem 0;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <main>
+        <!-- Top Section -->
+        <section class="top-section">
+            <div class="container">
+                <h1 class="top-title">Elevate Your Style</h1>
+                <p class="top-subtitle">Timeless Fashion, Sustainable Choices</p>
+                <a href="{% url 'main:product' %}" class="btn-primary">Shop Now</a>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section class="section products-section">
+            <div class="container">
+                <div class="product-intro">
+                    <h2 class="section-title">What is Thrift?</h2>
+                    <div class="info-cards">
+                        <div class="info-card">
+                            <h3>♻️ Reuse</h3>
+                            <p>Give clothes a second life by reusing gently loved fashion items.</p>
+                        </div>
+                        <div class="info-card">
+                            <h3>🌱 Sustainable</h3>
+                            <p>Reduce textile waste and support eco-friendly fashion choices.</p>
+                        </div>
+                        <div class="info-card">
+                            <h3>💰 Affordable</h3>
+                            <p>Access stylish outfits at a fraction of retail prices.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="thrift-actions" style="text-align: center;">
+                    <a href="{% url 'main:user_upload_thrift' %}" class="btn-primary">Upload Clothes for Thrift</a>
+                </div>
+
+                <div class="thrift-grid">
+                    {% for item in thrift_items %}
+                        <div class="thrift-card">
+                            <img src="{{ item.image_url }}" alt="Thrift item" class="thrift-img"/>
+                            <div class="thrift-details">
+                                <h3 class="thrift-title">{{ item.name }}</h3>
+                                <p class="thrift-desc">{{ item.description|truncatechars:80 }}</p>
+                                <p class="thrift-price">${{ item.price }}</p>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="no-items">No thrift items available at the moment.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </main>
+{% endblock %}

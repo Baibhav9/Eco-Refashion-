@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - ECO Refashion{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'main/css/index.css' %}">
+    <style>
+        .product-section {
+            padding: 2rem 0;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <section class="top-section">
+        <div class="container">
+            <h1 class="top-title">Elevate Your Style</h1>
+            <p class="top-subtitle">Timeless Fashion, Sustainable Choices</p>
+            <a href="{% url 'main:product' %}" class="btn-primary">Shop Now</a>
+        </div>
+    </section>
+    <section class="product-section">
+        <div class="container">
+            <h2>🛍️ Products on Sale</h2>
+            <div class="product-grid">
+                {% for product in sale_products %}
+                    <div class="product-card">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                        <h3>{{ product.name }}</h3>
+                        <p>Rs. {{ product.price }}</p>
+{#                        <a href="{% url 'main:product' product.id %}" class="btn-secondary">View</a>#}
+                    </div>
+                {% empty %}
+                    <p>No products on sale right now.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="product-section">
+        <div class="container">
+            <h2>🧥 Rentable Fashion</h2>
+            <div class="product-grid">
+                {% for product in rent_products %}
+                    <div class="product-card">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                        <h3>{{ product.title }}</h3>
+                        <p>Rs. {{ product.price }} / day</p>
+{#                        <a href="{% url 'main:product_detail' product.id %}" class="btn-secondary">Rent</a>#}
+                    </div>
+                {% empty %}
+                    <p>No products available for rent.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="product-section">
+        <div class="container">
+            <h2>♻️ Thrifted Finds</h2>
+            <div class="product-grid">
+                {% for product in thrifts %}
+                    <div class="product-card">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                        <h3>{{ product.name }}</h3>
+                        <p>${{ product.price }}</p>
+                        <a class="btn-secondary">Explore</a>
+                    </div>
+                {% empty %}
+                    <p>No thrifted items available right now.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
