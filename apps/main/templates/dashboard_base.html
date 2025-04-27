@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ request.user.get_full_name }} - Dashboard{% endblock %}
+
+{% block content %}
+    <div class="container h-100">
+        <div class="row g-0 h-100 position-relative">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar shadow-sm position-sticky"
+                 style="top: 0; left: 0; height: 100vh; overflow-y: auto;">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="{% url 'main:dashboard' %}">
+                                <i class="fas fa-columns me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        {% if request.user.role == 'user' %}
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="{% url 'main:orders' %}">
+                                    <i class="fas fa-shopping-bag me-2"></i>
+                                    My Orders
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'main:user_rental_requests' %}">
+                                    <i class="fas fa-box-open me-2"></i>
+                                    My Rentals
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'main:product_by_category' 'donation' %}">
+                                    <i class="fas fa-gift me-2"></i>
+                                    My Donations
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'main:product_by_category' 'recycle' %}">
+                                    <i class="fas fa-sync-alt me-2"></i>
+                                    My Recycles
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="{% url 'main:product_by_category' 'thrift' %}">
+                                    <i class="fas fa-shopping-bag me-2"></i>
+                                    My Thrifts
+                                </a>
+                            </li>
+                        {% elif request.user.role == 'seller' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'main:product_by_category' 'product' %}">
+                                    <i class="fas fa-sync-alt me-2"></i>
+                                    My Products
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'main:product_by_category' 'rental' %}">
+                                    <i class="fas fa-sync-alt me-2"></i>
+                                    My Rentals
+                                </a>
+                            </li>
+                        {% elif request.user.role == 'admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'main:product_by_category' 'product' %}">
+                                    <i class="fas fa-sync-alt me-2"></i>
+                                    Products
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'main:product_by_category' 'rental' %}">
+                                    <i class="fas fa-sync-alt me-2"></i>
+                                    Rentals
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="{% url 'main:product_by_category' 'thrift' %}">
+                                    <i class="fas fa-shopping-bag me-2"></i>
+                                    Thrifts
+                                </a>
+                            </li>
+                        {% elif request.user.role == 'organization' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'main:product_by_category' 'donation' %}">
+                                    <i class="fas fa-gift me-2"></i>
+                                    Donations
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'main:product_by_category' 'recycle' %}">
+                                    <i class="fas fa-sync-alt me-2"></i>
+                                    Recycles
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="offset-md-3 offset-lg-2 col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                {% block dashboard_content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

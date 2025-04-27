@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Products - ECO Refashion{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block content %}
+    <section class="py-5 bg-light text-center">
+        <div class="hero-content container">
+            <h1 class="display-4 mb-3">Our {{ title|title }}s</h1>
+            <p class="lead text-muted mb-4">Shop Sustainable Fashion</p>
+            <a href="{% url 'main:cart' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-shopping-cart me-2"></i> View Cart
+            </a>
+        </div>
+    </section>
+
+    <section class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Quality Sustainable {{ title|title }}s</h2>
+                <p class="text-muted">Discover our curated collection of eco-friendly fashion items.</p>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="h5 fw-bold">Available {{ title|title }}s</h3>
+                <span class="badge bg-primary fs-6">{{ products.count }} items</span>
+            </div>
+
+            {% if products %}
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+                    {% for product in products %}
+                        {% include 'main/includes/product_card.html' with obj=product %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-warning text-center">
+                    <i class="fas fa-exclamation-circle me-2"></i> No approved products available at the moment.
+                    <div class="mt-2">
+                        <a href="{% url 'main:products' 'rental' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-search me-2"></i> Explore Rental Items
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

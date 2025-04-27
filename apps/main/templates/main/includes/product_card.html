@@ -1,31 +1,28 @@
-<div class="product-card">
-    <div class="product-image-container">
-        {% if product.image %}
-            <img src="{{ product.image.url }}" alt="{{ product.title }}" class="product-image">
-        {% else %}
-            <div class="no-image">No image available</div>
-        {% endif %}
-        <div class="product-badge">For Sale</div>
-    </div>
+{% load static %}
 
-    <div class="product-details">
-        <h3 class="product-title">{{ product.title }}</h3>
-        <p class="product-description">{{ product.description|truncatechars:100 }}</p>
-
-        <div class="product-meta">
-            <span class="price">Rs. {{ product.price }}</span>
-            {% if product.available_size %}
-                <span class="size">Size: {{ product.available_size }}</span>
-            {% endif %}
-        </div>
-
-        <div class="seller-info">
-            <span class="seller-label">Sold by:</span>
-            <span class="seller-name">{{ product.seller.username }}</span>
-        </div>
-
-        <a class="add-to-cart" style="text-align: center;" href="{% url 'main:cart_action_with_id' 'add' product.id %}">
-            Add to Cart
+<div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="card h-100 shadow-sm position-relative">
+        <a class="d-flex align-items-center btn btn-light position-absolute top-0 end-0 m-2 shadow-sm rounded-circle" style="height: 44px; width: 44px;" href="{% url 'main:cart_action_with_id' 'add' obj.id%}">
+            <i class="fas fa-shopping-cart"></i>
         </a>
+
+        {% if obj.image %}
+            <img src="{{ obj.image.url }}" class="card-img-top object-fit-cover" alt="{{ obj.title }}" style="height: 259px; width: 100%;">
+        {% else %}
+            <img src="{% static 'images/default_clothes.webp' %}" class="card-img-top object-fit-fill" alt="{{ obj.title }}"/>
+        {% endif %}
+
+        <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ obj.title }}</h5>
+            <p class="card-text text-muted">Rs. {{ obj.price }}</p>
+
+            {% if obj.description %}
+                <p class="card-text">{{ obj.description|truncatewords:20 }}</p>
+            {% endif %}
+
+            <div class="mt-auto">
+                <a href="{% url 'main:product_detail' obj.id %}" class="btn btn-outline-primary w-100">View</a>
+            </div>
+        </div>
     </div>
 </div>

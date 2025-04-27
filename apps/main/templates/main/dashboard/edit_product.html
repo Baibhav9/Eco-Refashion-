@@ -1,0 +1,16 @@
+{% extends 'dashboard_base.html' %}
+
+{% block dashboard_content %}
+    <h2 class="mb-3">Edit {{ title|title }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        {{ form.as_div }}
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
+    </form>
+{% endblock %}

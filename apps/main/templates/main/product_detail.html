@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ object.title }} - Eco Refashion
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+
+    {% include 'main/includes/breadcrumb.html' with object=object %}
+
+    <div class="row align-items-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                {% if object.image %}
+                    <img src="{{ object.image.url }}" class="card-img-top p-3" alt="{{ object.title }}" style="height: 400px; object-fit: cover;">
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card-body">
+                <h2 class="card-title">{{ object.title }}</h2>
+                <p class="card-text text-muted">{{ object.description }}</p>
+
+                <div class="mt-4">
+                    {% if object.price %}
+                        <h4 class="text-primary">Rs. {{ object.price }}</h4>
+                    {% endif %}
+                    {% if object.available_size %}
+                        <p><strong>Available Size:</strong> {{ object.available_size }}</p>
+                    {% endif %}
+                    {% if object.color %}
+                        <p><strong>Color:</strong> {{ object.color }}</p>
+                    {% endif %}
+                </div>
+
+                <a href="{% url 'main:cart_action_with_id' 'add' object.id %}" class="btn btn-success mt-4">Add to Cart</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Similar Products Section -->
+    <div class="mt-5">
+        <h4 class="mb-4">Similar {{ object.category|title }} Products</h4>
+        <div class="row">
+            {% for similar in similar_products %}
+                {% include 'main/includes/product_card.html' with obj=similar %}
+            {% empty %}
+                <p class="text-muted">No similar products found.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

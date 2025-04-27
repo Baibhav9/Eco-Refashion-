@@ -1,8 +1,10 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
-from .constants import ProductApprovalStatus, SellerProductCategory, UserProductCategory, TransactionStatus, \
-    PaymentChoices
+from .constants import ProductApprovalStatus, TransactionStatus, \
+    PaymentChoices, ProductCategory, ProductDeliveryOption
 
 
 # main/models.py
@@ -17,51 +19,43 @@ class Product(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     available_size = models.CharField(max_length=50, blank=True, null=True)
     color = models.CharField(max_length=50, blank=True, null=True)
+    category = models.CharField(max_length=25, choices=ProductCategory.choices)
+    stock_amount = models.PositiveIntegerField(default=1)
 
-    class Meta:
-        abstract = True
-
-
-class SellerProduct(Product):
-    category = models.CharField(max_length=25, choices=SellerProductCategory.choices)
-
-    def __str__(self):
-        return f"{self.title} - {self.category}"
-
-
-class UserProduct(Product):
-    category = models.CharField(max_length=25, choices=UserProductCategory.choices)
+    delivery_option = models.CharField(max_length=50, blank=True, null=True, choices=ProductDeliveryOption.choices)
+    pickup_address = models.CharField(max_length=255, default='Baneshwor, Kathmandu')
+    pickup_phone = models.CharField(max_length=255, default="9800000000")
 
     def __str__(self):
         return f"{self.title} - {self.category}"
-
 
 class RentalRequest(models.Model):
-    STATUS_CHOICES = (
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-    )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    cloth_item = models.ForeignKey('UserProduct', on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    request_date = models.DateTimeField(auto_now_add=True)
+    order = models.ForeignKey('Order', on_delete=models.CASCADE, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=ProductApprovalStatus.choices, default=ProductApprovalStatus.PENDING)
+    requested_date = models.DateTimeField(auto_now_add=True)
+    requested_for = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.cloth_item.title} ({self.status})"
+        return f"{self.user.username} - {self.order.name} ({self.status})"
 
 
 class Transaction(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    products = models.ManyToManyField(SellerProduct, related_name='products')
+    products = models.ManyToManyField(Product, related_name='products')
     transaction_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=25, choices=TransactionStatus.choices, default=TransactionStatus.PENDING)
+    pidx = models.CharField(max_length=100, unique=True)  # Payment ID (unique for each transaction)
+    transaction_id = models.CharField(max_length=100, unique=True)  # Transaction ID (unique)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    refunded = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    order = models.ForeignKey('Order', on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.transaction_date}"
+        return f"Transaction {self.transaction_id} - {self.status}"
 
 class Order(models.Model):
+    name = models.TextField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=10, choices=PaymentChoices.choices)
@@ -71,10 +65,18 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        if is_new and not self.name:
+            self.name = f"Order #{self.id}-{self.user.username}-{self.payment_method}-{self.ordered_at.strftime('%Y-%m-%d %H:%M')}"
+            super().save(update_fields=['name'])
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
-    product = models.ForeignKey(SellerProduct, on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -87,7 +89,7 @@ class OrderItem(models.Model):
 
 class Cart(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    product = models.ForeignKey("main.SellerProduct", on_delete=models.CASCADE, related_name='cart_items')
+    product = models.ForeignKey("main.Product", on_delete=models.CASCADE, related_name='cart_items')
     quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
 

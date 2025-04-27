@@ -1,0 +1,84 @@
+:root {
+    --primary-color: #4a9d5b;
+    --secondary-color: #ffffff;
+    --text-color: #000000;
+    --light-text-color: #000000;
+    --border-color: #e0e0e0;
+    --accent-color: #6aaa75;
+    --white: #fff;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+main {
+    flex-grow: 1;
+}
+
+header,
+footer {
+    background-color: var(--primary-color);
+}
+
+.hero-section {
+    background-image: url("/static/images/hero.png");
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 55vh;
+}
+
+.hero-content {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--accent-color);
+}
+
+.btn-primary:hover {
+    background-color: green;
+    border-color: green;
+}
+
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.user-nav-menu {
+    background-color: white;
+}
+
+.errorlist {
+    background-color: #f8d7da;
+    color: #842029;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    list-style: none;
+    margin-bottom: 10px;
+}

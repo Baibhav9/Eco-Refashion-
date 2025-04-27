@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    {{ request.user.get_full_name }} - Profile
+{% endblock %}
+
+{% block content %}
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="me-4">
+                                    {% if request.user.profile_image %}
+                                        <img src="{{ request.user.profile_image.url }}" alt="Profile Image"
+                                             class="rounded-circle" width="100" height="100">
+                                    {% else %}
+                                        <img src="{% static 'images/default-profile.png' %}" alt="Default Profile"
+                                             class="rounded-circle" width="100" height="100">
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h4 class="mb-0">{{ request.user.get_full_name }}</h4>
+                                    <p class="text-muted mb-0">@{{ request.user.username }}</p>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4 fw-semibold text-muted">First Name:</div>
+                                <div class="col-sm-8">{{ request.user.first_name }}</div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4 fw-semibold text-muted">Last Name:</div>
+                                <div class="col-sm-8">{{ request.user.last_name }}</div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4 fw-semibold text-muted">Email:</div>
+                                <div class="col-sm-8">{{ request.user.email }}</div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-4 fw-semibold text-muted">Username:</div>
+                                <div class="col-sm-8">{{ request.user.username }}</div>
+                            </div>
+
+                            <div class="text-end d-flex justify-content-end gap-2">
+                                <a href="{% url 'accounts:change_password' %}" class="btn btn-outline-secondary">Change
+                                    Password</a>
+                                <a href="{% url 'accounts:profile_update' %}" class="btn btn-outline-primary">Edit
+                                    Profile</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

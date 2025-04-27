@@ -1,0 +1,13 @@
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'main:index' %}">Home</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'main:products' object.category %}">{{ object.category|title }}s</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            {{ object.title }}
+        </li>
+    </ol>
+</nav>

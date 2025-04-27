@@ -1,0 +1,79 @@
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light shadow-sm p-5">
+        <div class="container">
+            <a class="navbar-brand fw-bold link-light" href="{% url 'main:index' %}"><i class="fa-solid fa-leaf"></i>
+                ECO Refashion</a>
+
+            <button class="navbar-toggler border-light p-2" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarContent"
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fa-solid fa-bars fa-xl link-light"></i>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-end" id="navbarContent align-items-center">
+                <ul class="navbar-nav mb-2 mb-lg-0 me-3 gap-2">
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-light bg-light" href="{% url 'main:products' 'product' %}">
+                            <i class="fas fa-tshirt"></i> Products
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-light bg-light" href="{% url 'main:products' 'rental' %}">
+                            <i class="fas fa-people-carry"></i> Renting
+                        </a>
+                    </li>
+                </ul>
+
+                {% if user.is_authenticated %}
+                    <ul class="navbar-nav mb-2 mb-lg-0 align-items-center">
+                        <li class="nav-item dropdown">
+                            <span class="nav-link dropdown-toggle user-nav-menu px-3 rounded-3" id="profileDropdown"
+                                  role="button"
+                                  data-bs-toggle="dropdown">
+                                {% if user.profile_image %}
+                                    <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}"
+                                         class="rounded-circle" style="width: 40px; height: 40px;"/>
+                                {% else %}
+                                    <i class="fas fa-user"></i>
+                                {% endif %}
+                                {{ user.get_full_name }}
+                            </span>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:dashboard' %}">
+                                        <i class="fas fa-chart-line"></i> Dashboard
+                                    </a>
+                                </li>
+
+                                {% if user.role == 'user' %}
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'main:cart' %}">
+                                            <i class="fas fa-shopping-cart"></i> Cart
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                {% endif %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                        <i class="fa-solid fa-id-card"></i> Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                {% else %}
+                    <a class="btn btn-outline-light ms-2" href="{% url 'accounts:login' %}"><i
+                            class="fas fa-sign-in-alt"></i> Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+</header>
+

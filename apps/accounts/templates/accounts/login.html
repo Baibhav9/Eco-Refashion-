@@ -3,20 +3,55 @@
 
 {% block title %}Login - ECO Refashion{% endblock %}
 
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'accounts/css/form.css' %}">
-{% endblock %}
-
 {% block content %}
-    <section class="form-section">
-        <div class="form-container">
-            <h2 class="form-title">Login</h2>
-            <form method="POST">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="btn-primary">Sign In</button>
-            </form>
-            <p class="form-footer">Don't have an account? <a href="{% url 'accounts:register' %}">Register here</a></p>
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h2 class="mb-4 text-center">Login</h2>
+                            <form method="POST" novalidate>
+                                {% csrf_token %}
+                                {% if form.non_field_errors %}
+                                    <div class="alert alert-danger">
+                                        {% for error in form.non_field_errors %}
+                                            <p class="mb-0">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <div class="mb-3">
+                                    <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                                    {{ form.username }}
+                                    {% if form.username.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.username.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+                                    {{ form.password }}
+                                    {% if form.password.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.password.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100">Sign In</button>
+                            </form>
+
+                            <p class="mt-3 text-center text-muted">
+                                Don't have an account?
+                                <a href="{% url 'accounts:register' %}">Register here</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 {% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Rental{% endblock %}
+
+{% block content %}
+    <section class="py-5">
+        <div class="container">
+            <h2 class="mb-4">Rental Confirmation</h2>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card h-100 shadow-sm">
+                        <div class="row g-0">
+                            {% for item in cart_items %}
+                                <div class="col-4 d-flex align-items-center">
+                                    {% if item.product.image %}
+                                        <img src="{{ item.product.image.url }}" class="img-fluid rounded-start"
+                                             alt="{{ item.product.title }}">
+                                    {% endif %}
+                                </div>
+                                <div class="col-8">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ item.product.title }}</h5>
+                                        <p class="card-text small">{{ item.product.description|truncatewords:15 }}</p>
+                                        <p class="text-muted small">Price per day: Rs. {{ item.product.price }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="border p-4 rounded shadow-sm h-100 d-flex flex-column">
+                        <form method="POST" class="flex-grow-1 d-flex flex-column">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label for="rental_duration" class="form-label">Select rental duration (days):</label>
+                                <input type="number" id="rental_duration" name="rental_duration" class="form-control"
+                                       min="1" max="7" value="7">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="requested_for" class="form-label">Rental Return Date:</label>
+                                <input type="text" id="requested_for" name="requested_for" class="form-control"
+                                       readonly>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Total Amount (Rs.):</label>
+                                <input type="number" name="total_amount" id="total_amount" class="form-control" readonly>
+                            </div>
+
+                            <button type="submit" class="btn btn-success btn-lg w-100 mt-auto">Confirm Rent</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const rentalDurationInput = document.getElementById('rental_duration');
+            const requestedForInput = document.getElementById('requested_for');
+            const totalAmountInput = document.getElementById('total_amount');
+
+            // Set up per-day prices
+            const cartItemsPrices = [
+                {% for item in cart_items %}
+                    {{ item.product.price }},
+                {% endfor %}
+            ];
+
+            function updateRequestedFor() {
+                const today = new Date();
+                const duration = parseInt(rentalDurationInput.value) || 0;
+                const returnDate = new Date(today);
+                returnDate.setDate(today.getDate() + duration);
+
+                const year = returnDate.getFullYear();
+                const month = String(returnDate.getMonth() + 1).padStart(2, '0');
+                const day = String(returnDate.getDate()).padStart(2, '0');
+
+                requestedForInput.value = `${year}-${month}-${day}`;
+            }
+
+            function updateTotalAmount() {
+                const duration = parseInt(rentalDurationInput.value) || 0;
+                const perDayTotal = cartItemsPrices.reduce((a, b) => a + b, 0);
+                const total = perDayTotal * duration;
+                totalAmountInput.value = total;
+            }
+
+            function updateAll() {
+                updateRequestedFor();
+                updateTotalAmount();
+            }
+
+            rentalDurationInput.addEventListener('input', updateAll);
+
+            updateAll();
+        });
+    </script>
+{% endblock %}
