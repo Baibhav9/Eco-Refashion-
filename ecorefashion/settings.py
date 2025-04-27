@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.accounts',
     'apps.main',
+
+    "django_tables2",
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
