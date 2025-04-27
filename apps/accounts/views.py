@@ -1,18 +1,19 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import PasswordChangeView
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout, get_user_model
 from django.contrib import messages
-from django.views import View
-from django.views.generic import TemplateView, CreateView
+from django.urls import reverse_lazy
+from django.views.generic import TemplateView, CreateView, UpdateView
 
-from .forms import CustomUserCreationForm
-from django.contrib.auth.forms import AuthenticationForm
+from .forms import CustomUserCreationForm, LoginForm, CustomUserChangeForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 
 
 class RegisterView(CreateView):
     template_name = "accounts/register.html"
-    model = get_user_model()
     form_class = CustomUserCreationForm
+    object = get_user_model()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -29,15 +30,20 @@ class RegisterView(CreateView):
         return self.render_to_response(context)
 
     def post(self, request, *args, **kwargs):
-        form = CustomUserCreationForm(request.POST)
+        context = self.get_context_data(**kwargs)
+
+        form = CustomUserCreationForm(request.POST, request.FILES)
 
         if form.is_valid():
             user = form.save()
             login(request, user)
             return redirect("accounts:login")
-        else:
-            messages.error(request, "Registration failed. Please correct the errors below.")
-            return self.render_to_response(self.get_context_data(form=form))
+
+        context.update({
+            'form': form
+        })
+        messages.error(request, "Registration failed. Please correct the errors below.")
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class LoginView(TemplateView):
@@ -45,7 +51,7 @@ class LoginView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        form = AuthenticationForm()
+        form = LoginForm()
         context.update({
             'form': form
         })
@@ -60,12 +66,11 @@ class LoginView(TemplateView):
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
 
-        form = AuthenticationForm(request, data=request.POST)
+        form = LoginForm(request, data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
             return redirect('main:index')
-        else:
-            form = AuthenticationForm()
+
         context.update({
             'form': form
         })
@@ -78,3 +83,37 @@ class LogoutView(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         logout(request)
         return redirect('main:index')
+
+class UserProfileView(LoginRequiredMixin, UpdateView):
+    object = get_user_model()
+    template_name = "accounts/profile.html"
+    queryset = object.objects.all()
+    fields = ['first_name', 'last_name', 'email', 'username', 'profile_image']
+
+    def get_object(self, queryset = None):
+        return self.request.user
+
+    def get_success_url(self):
+        return reverse_lazy("accounts:profile")
+
+class CustomPasswordChangeView(PasswordChangeView):
+    template_name = 'accounts/change_password.html'
+    success_url = '/accounts/profile/'
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        for field in form.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
+        return form
+
+
+class UserProfileUpdate(LoginRequiredMixin, UpdateView):
+    model = get_user_model()
+    form_class = CustomUserChangeForm
+    template_name = 'accounts/profile_update.html'
+    success_url = reverse_lazy('accounts:profile')
+
+    def get_object(self):
+        return self.request.user
+
+

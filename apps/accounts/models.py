@@ -9,6 +9,8 @@ class CustomUser(AbstractUser):
         ('admin', 'Admin'),
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
+    profile_image = models.ImageField(upload_to='profile/', null=True, blank=True)
+    phone = models.CharField(max_length=50, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.role == 'admin':
