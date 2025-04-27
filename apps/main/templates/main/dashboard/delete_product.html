@@ -1,0 +1,17 @@
+{% extends 'dashboard_base.html' %}
+
+{% block dashboard_content %}
+    <div class="container mt-5">
+        <h2 class="mb-4">Are you sure you want to delete the product "{{ object.title }}"?</h2>
+
+        <p><strong>Category:</strong> {{ object.category }}</p>
+        <p><strong>Price:</strong> ${{ object.price }}</p>
+        <p><strong>Created at:</strong> {{ object.created_at|date:"F j, Y, g:i a" }}</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <a href="{% url 'main:product_by_category' category=object.category %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+{% endblock %}

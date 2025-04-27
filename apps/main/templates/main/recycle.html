@@ -4,8 +4,8 @@
 {% block title %}Recycle - ECO Refashion{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'main/css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'main/css/recycle.css' %}">
+    <link rel="stylesheet" href="{% static 'main/../../../../static/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'main/../../../../static/css/recycle.css' %}">
     <style>
         .btn-primary {
             color: white;
@@ -107,7 +107,7 @@
         <div class="container">
             <h1 class="top-title">Recycle for a Better Tomorrow</h1>
             <p class="top-subtitle">Reduce waste, restore value, and redefine fashion.</p>
-            <a href="{% url 'main:product' %}" class="btn-primary">Shop Now</a>
+            <a href="{% url 'products' %}" class="btn-primary">Shop Now</a>
         </div>
     </section>
 

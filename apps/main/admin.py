@@ -1,8 +1,8 @@
 from django.contrib import admin
-from .models import SellerProduct, UserProduct, RentalRequest, Cart, Product, Order, OrderItem
+from .models import RentalRequest, Cart, Product, Order, OrderItem
 from django.shortcuts import render
 
-class SellerProductAdmin(admin.ModelAdmin):
+class ProductAdmin(admin.ModelAdmin):
     list_display = ('title', 'user', 'category', 'status', 'price', 'created_at')
     list_filter = ('status', 'category', 'created_at')
     list_editable = ('price',)
@@ -64,8 +64,7 @@ class UserProductAdmin(admin.ModelAdmin):
     approve_products.short_description = "Approve selected items"
 
 #Admin classes
-admin.site.register(SellerProduct, SellerProductAdmin)
-admin.site.register(UserProduct, UserProductAdmin)
+admin.site.register(Product, ProductAdmin)
 admin.site.register(Cart)
 admin.site.register(Order)
 admin.site.register(OrderItem)

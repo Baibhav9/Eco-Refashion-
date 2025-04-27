@@ -3,48 +3,87 @@
 {% block title %}Checkout{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'main/css/../../static/main/css/checkout.css' %}">
 {% endblock %}
 
 {% block content %}
-<section class="checkout-section">
-    <div class="container">
-        <h2>Checkout</h2>
+    <section class="py-5">
+        <div class="container">
+            <h2 class="mb-4">Checkout</h2>
 
-        {% if cart_items %}
-            <div class="order-summary">
-                <h3>Order Summary</h3>
-                <ul>
-                    {% for item in cart_items %}
-                        <li>
-                            {{ item.quantity }} × {{ item.product.title }} - Rs. {{ item.get_total_price }}
-                        </li>
-                    {% endfor %}
-                </ul>
-                <p><strong>Total: Rs. {{ total }}</strong></p>
-            </div>
+            {% if cart_items %}
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Order Summary</h5>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                {% for item in cart_items %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            {{ item.quantity }} × {{ item.product.title }}
+                                        </div>
 
-            <form method="POST" action="{% url 'main:checkout' %}" class="payment-form">
-                {% csrf_token %}
-                <h3>Choose Payment Method</h3>
+                                        <span>Rs. {{ item.get_total_price }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {% if request.GET.rental_duration %}
+                                            <div>
+                                                For: {{ request.GET.rental_duration }} days
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <div class="card-footer text-end">
+                                <h5 class="mb-0">Total: Rs. {{ total }}</h5>
+                            </div>
+                        </div>
+                    </div>
 
-                <input type="hidden" value="{{ total }}" name="total_amount" />
+                    <div class="col-lg-6">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">Payment Method</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="total_amount" value="{{ total }}"/>
 
-                <div class="payment-options">
-                    <label>
-                        <input type="radio" name="payment_method" value="cod" checked>
-                        Cash on Delivery
-                    </label>
-                    <label>
-                        <input type="radio" name="payment_method" value="khalti">
-                        Khalti
-                    </label>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="payment_method" value="cod"
+                                               id="cod" checked>
+                                        <label class="form-check-label" for="cod">
+                                            Cash on Delivery
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check mb-4">
+                                        <input class="form-check-input" type="radio" name="payment_method"
+                                               value="khalti" id="khalti">
+                                        <label class="form-check-label" for="khalti">
+                                            Khalti
+                                        </label>
+                                        <div>
+                                            <img src="{% static 'images/khalti.png' %}" alt="Khalti Payment Gateway"
+                                                 class="img-fluid"/>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-success w-100">
+                                        Confirm Order
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button type="submit" class="btn-primary">Confirm Order</button>
-            </form>
-        {% else %}
-            <p>Your cart is empty.</p>
-        {% endif %}
-    </div>
-</section>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    Your cart is empty.
+                </div>
+            {% endif %}
+        </div>
+    </section>
 {% endblock %}

@@ -1,19 +1,29 @@
+import json
+import os
+from decimal import Decimal
+from time import timezone
+
+import requests
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Case, When, BooleanField, Value, ExpressionWrapper
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import TemplateView, CreateView, ListView, View
+from django.urls import reverse_lazy, reverse
+from django.views.generic import TemplateView, CreateView, ListView, View, DetailView, DeleteView, UpdateView
+from django_tables2 import SingleTableView
 
-from .constants import ProductApprovalStatus, SellerProductCategory, UserProductCategory, Roles
-from .models import UserProduct, Cart, SellerProduct, RentalRequest, Product, OrderItem
-from apps.accounts.decorators import role_required
-from .forms import SellerProductForm, UserProductForm, OrderForm
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required
+from .constants import ProductApprovalStatus, Roles, ProductCategory, PRODUCT_CATEGORY_LIST, PaymentChoices, \
+    TransactionStatus
+from .models import Cart, RentalRequest, Product, OrderItem, Order, Transaction
+from .forms import ProductForm, OrderForm
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Sum, F, DecimalField
 from django.db import transaction
+
+from .tables import OrderTable, ProductTable, RentalRequestTable
+from ..accounts.models import CustomUser
 
 
 class RoleRequiredMixin:
@@ -42,10 +52,10 @@ class IndexView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        products = SellerProduct.objects.all()
-        sale_products = products.filter(category=SellerProductCategory.PRODUCT)
-        rent_products = products.filter(category=SellerProductCategory.RENTING)
-        thrifts = UserProduct.objects.filter(category=UserProductCategory.THRIFT)
+        products = Product.objects.all()
+        sale_products = products.filter(category=ProductCategory.PRODUCT, status=ProductApprovalStatus.APPROVED)
+        rent_products = products.filter(category=ProductCategory.RENTING, status=ProductApprovalStatus.APPROVED)
+        thrifts = Product.objects.filter(category=ProductCategory.THRIFT, status=ProductApprovalStatus.APPROVED)
 
         context.update({
             'sale_products': sale_products,
@@ -58,320 +68,214 @@ class IndexView(TemplateView):
 # Product view (show only approved products)
 class ProductsView(TemplateView):
     """Show only APPROVED products with category='product'"""
-    template_name = "main/products.html"
+    template_name = "main/products_list.html"
 
     def get_context_data(self, **kwargs):
         context = super(ProductsView, self).get_context_data(**kwargs)
-        products = SellerProduct.objects.filter(
-            status="Approved",
-            category='Product',
+        category = self.kwargs['category']
+
+        if not category in PRODUCT_CATEGORY_LIST:
+            raise Http404("Category Not Found")
+
+        products = Product.objects.filter(
+            status=ProductApprovalStatus.APPROVED,
+            category=category,
         ).order_by('-created_at')
 
-        print(products)
-
         context.update({
+            'title': category,
             'products': products,
         })
 
         return context
 
 
-# Donate view
-class DonateView(LoginRequiredMixin, TemplateView):
-    template_name = "main/donate.html"
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'main/product_detail.html'
+    context_object_name = 'object'
 
-# Recycle view
-class RecycleView(LoginRequiredMixin, TemplateView):
-    template_name = "main/recycle.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        recycled_products = UserProduct.objects.filter(category=UserProductCategory.RECYCLE)
-        context.update({
-            'recycled_products': recycled_products,
-        })
-        return context
-
-
-# Thrift view
-class ThriftView(LoginRequiredMixin, TemplateView):
-    template_name = "main/thrift.html"
+    def get_object(self, queryset=None):
+        return Product.objects.get(pk=self.kwargs['id'])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        thrift_products = UserProduct.objects.filter(category=UserProductCategory.THRIFT)
-        context.update({
-            'thrift_products': thrift_products,
-        })
+        product = self.get_object()
+        context['similar_products'] = Product.objects.filter(
+            category=product.category
+        ).exclude(pk=product.pk)[:6]
         return context
 
 
-
-# Rental pending view (shown to user after they request a rental)
-def rental_pending(request):
-    return render(request, 'rental_pending.html')
+class UserDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = "main/dashboard/dashboard.html"
 
 
-# User dashboard view (show pending uploads)
-class UserDashboardView(LoginRequiredMixin, RoleRequiredMixin, ListView):
-    model = UserProduct
-    template_name = "main/user_dashboard.html"
-    required_roles = "user"
+class OrderListView(LoginRequiredMixin, SingleTableView):
+    model = Order
+    template_name = "main/dashboard/list_table.html"
+    table_class = OrderTable
+
+    def get_context_data(self, **kwargs: None):
+        context = super().get_context_data(**kwargs)
+
+        context.update({
+            "title": "Orders"
+        })
+
+        return context
+
+
+class ProductCategoryListView(LoginRequiredMixin, SingleTableView):
+    model = Product
+    template_name = "main/dashboard/list_table.html"
+    table_class = ProductTable
 
     def get_queryset(self):
-        queryset = UserProduct.objects.filter(user=self.request.user)
-        return queryset
+        category = self.kwargs['category']
+        return Product.objects.filter(category=category).order_by('-created_at')
+
+    def get_context_data(self, **kwargs: None):
+        context = super().get_context_data(**kwargs)
+        category = self.kwargs['category']
+
+        if not category in PRODUCT_CATEGORY_LIST:
+            raise Http404("Category Not Available")
+
+        context.update({
+            "title": category,
+        })
+        return context
+
+    def get_table_kwargs(self, **kwargs):
+        kwargs["category"] = self.kwargs['category']
+        kwargs['user'] = self.request.user
+        return kwargs
 
 
-# Product page (show only approved items)
-def product_page(request):
-    products = UserProduct.objects.filter(status='approved')
-    return render(request, 'main/products.html', {'products': products})
+class ProductCategoryCreateView(LoginRequiredMixin, CreateView):
+    model = Product
+    template_name = "main/dashboard/create_product.html"
+    form_class = ProductForm
 
+    def get_success_url(self):
+        messages.success(self.request, f"Product successfully created.")
+        return reverse('main:product_by_category', kwargs={'category': self.kwargs['category']})
 
-def admin_thrift_recycle_list(request):
-    thrift_recycle_items = RentalRequest.objects.filter(status='pending')
-    return render(request, 'main/admin_thrift_recycle_list.html', {'thrift_recycle_items': thrift_recycle_items})
+    def get_context_data(self, **kwargs: None):
+        context = super().get_context_data(**kwargs)
+        category = self.kwargs['category']
 
+        if not category in PRODUCT_CATEGORY_LIST:
+            raise Http404("Category Not Available")
 
-# Rent item view (user submits a rental request)
-@login_required
-def rent_item(request, item_id):
-    item = get_object_or_404(UserProduct, id=item_id)
-    if item.status == 'approved' and item.is_rentable:
-        rental_request = RentalRequest.objects.create(user=request.user, cloth_item=item)
-        return redirect('rental_pending')  # Redirect to rental pending page
-    return redirect('renting_page')  # Redirect back if item is not rentable or approved
+        context.update({
+            "title": category,
+        })
+        return context
 
-
-# Seller's upload clothes for product view
-@role_required(allowed_roles=['seller'])
-def upload_clothes_for_product(request):
-    if request.method == 'POST':
-        form = SellerProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            product = form.save(commit=False)
-            product.seller = request.user
-            product.status = 'pending'  # status is pending until admin approval
-            product.save()
-            return redirect('seller_product_list')
-    else:
-        form = SellerProductForm()
-    return render(request, 'main/upload_clothes.html', {'form': form})
-
-
-# Organization view for donations
-@role_required(allowed_roles=['organization'])
-def org_view_donations(request):
-    cloth_uploads = UserProduct.objects.filter(upload_type='donation', status='pending')
-    return render(request, 'main/donations_list.html', {'cloth_uploads': cloth_uploads})
-
-
-# Admin approve clothes view
-@role_required(allowed_roles=['admin'])
-def admin_approve_clothes(request):
-    cloth_uploads = UserProduct.objects.filter(status='pending')
-    return render(request, 'main/approve_clothes.html', {'cloth_uploads': cloth_uploads})
-
-
-# Cloth upload view (user uploads cloth for donation, recycle, etc.)
-class UploadClothView(LoginRequiredMixin, RoleRequiredMixin, CreateView):
-    required_roles = "user"
-    model = UserProduct
-    form_class = UserProductForm
-    template_name = "main/upload_cloth.html"
-
-    def dispatch(self, request, *args, **kwargs):
-        self.upload_type = kwargs.get('upload_type')
-        return super().dispatch(request, *args, **kwargs)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        kwargs["category"] = self.kwargs['category']
+        return kwargs
 
     def form_valid(self, form):
-        cloth = form.save(commit=False)
-        cloth.user = self.request.user
-        cloth.category = self.upload_type
-        cloth.save()
-        return redirect('main:user_dashboard')
+        form.instance.user = self.request.user
+        return super().form_valid(form)
 
-    def form_invalid(self, form):
-        return self.render_to_response(self.get_context_data(form=form))
 
-    def get_context_data(self, **kwargs):
+class ProductCategoryUpdateView(LoginRequiredMixin, UpdateView):
+    model = Product
+    template_name = "main/dashboard/edit_product.html"
+    form_class = ProductForm
+
+    def get_object(self, queryset=None):
+        category = self.kwargs['category']
+        product_id = self.kwargs['id']
+        return get_object_or_404(Product, category=category, pk=product_id)
+
+    def get_success_url(self):
+        messages.success(self.request, f"Product with id {self.object.id} successfully updated.")
+        return reverse('main:product_by_category', kwargs={'category': self.kwargs['category']})
+
+    def get_context_data(self, **kwargs: None):
         context = super().get_context_data(**kwargs)
-        context['upload_type'] = self.upload_type
-        return context
+        category = self.kwargs['category']
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        if self.upload_type != UserProductCategory.THRIFT:
-            form.fields.pop('price', None)
-        return form
+        if not category in PRODUCT_CATEGORY_LIST:
+            raise Http404("Category Not Available")
 
-
-# Admin approval view for each cloth upload
-@staff_member_required
-def approve_upload(request, upload_id):
-    product = get_object_or_404(UserProduct, id=upload_id)
-    if request.method == 'POST':
-        product.status = 'approved'
-        product.save()
-        return redirect('admin_product_approval')
-    return render(request, 'main/approve_upload.html', {'product': product})
-
-
-# Organization dashboard for confirming donations and recycled clothes
-class OrganizationDashboardView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
-    template_name = "main/organization_dashboard.html"
-    required_roles = Roles.ORGANIZATION
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        cloth_uploads = UserProduct.objects.filter(category__in=[UserProductCategory.DONATION, UserProductCategory.RECYCLE], status='pending').order_by(
-            "-created_at"
-        )
         context.update({
-            'cloth_uploads': cloth_uploads,
+            "title": category,
         })
         return context
 
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
 
-# Organization confirms the donation or recycled items
-def confirm_cloth_upload(request, upload_id):
-    if not request.user.is_authenticated or request.user.role != 'organization':
-        raise PermissionDenied("You are not authorized to perform this action.")
-    cloth = get_object_or_404(UserProduct, id=upload_id)
-    if request.method == 'POST':
-        cloth.status = 'confirmed'
-        cloth.save()
-    return redirect('organization_dashboard')
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        kwargs["category"] = self.kwargs['category']
+        return kwargs
+
+class RentalRequestListView(LoginRequiredMixin, SingleTableView):
+    model = RentalRequest
+    template_name = "main/dashboard/list_table.html"
+    table_class = RentalRequestTable
+
+class ProductCategoryDeleteView(LoginRequiredMixin, DeleteView):
+    model = Product
+    template_name = "main/dashboard/delete_product.html"
+
+    def get_object(self, queryset=None):
+        category = self.kwargs['category']
+        product_id = self.kwargs['id']
+        return get_object_or_404(Product, category=category, pk=product_id)
+
+    def get_success_url(self):
+        messages.success(self.request, f"Product with id {self.object.id} successfully deleted.")
+        return reverse_lazy("main:product_by_category", kwargs={'category': self.kwargs['category']})
 
 
-class RentalApprovalView(LoginRequiredMixin, RoleRequiredMixin, ListView):
-    required_roles = Roles.ADMIN
-    template_name = "main/rentals.html"
-    object_list = SellerProduct.objects.filter(status='approved')
-
-    def get_queryset(self):
-        return self.object_list.filter(category=SellerProductCategory.RENTING)
-
+class ProductApproveView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        qs = self.get_queryset()
-        product_id = request.GET.get("id")
-        action = request.GET.get("action")
-
-        if action == "approve" and product_id:
-            try:
-                product = qs.get(id=product_id)
-                product.status = ProductApprovalStatus.APPROVED
-                product.save()
-            except SellerProduct.DoesNotExist:
-                pass  # Optional: Add a message or log it
-
-        context = super().get_context_data(**kwargs)
-        return self.render_to_response(context)
+        product_id = self.kwargs['id']
+        product = get_object_or_404(Product, id=product_id)
+        product.status = ProductApprovalStatus.APPROVED
+        product.save()
+        messages.success(request, f"Product with id {product.id} successfully approved.")
+        return redirect("main:product_by_category", category=product.category)
 
 
-# Cart view for users
-def user_cart(request):
-    cart_items = Cart.objects.filter(user=request.user)
-    total = sum(item.get_total_price() for item in cart_items)
-    return render(request, 'main/cart.html', {'cart_items': cart_items, 'total': total})
-
-
-# Display user's uploaded products
-class SellerUploadView(LoginRequiredMixin, RoleRequiredMixin, CreateView):
-    template_name = "main/seller_upload_product.html"
-    model = SellerProduct
-    form_class = SellerProductForm
-    required_roles = "seller"
+class RentalRequestView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
+    required_roles = Roles.USER
+    template_name = "main/rental_request.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        form = SellerProductForm()
-        context['form'] = form
+        cart_items = Cart.objects.prefetch_related("product").filter(user=self.request.user, product__category=ProductCategory.RENTING)
+
+        context.update({
+            "cart_items": cart_items,
+        })
+
         return context
 
-    def post(self, request, *args, **kwargs):
-        form = SellerProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            product = form.save(commit=False)
-            product.user = request.user
-            product.state = "pending"
-            product.save()
-            return redirect('main:seller_product_list')
-        else:
-            return self.render_to_response(self.get_context_data())
-
-
-# Seller's product list view
-class SellerProductListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
-    model = SellerProduct
-    required_roles = "seller"
-    template_name = "main/seller_product_list.html"
-
-    def get_queryset(self):
-        qs = SellerProduct.objects.filter(user=self.request.user).order_by('-created_at')
-        return qs
-
-
-# Admin product approval view
-class AdminProductApprovalView(LoginRequiredMixin, RoleRequiredMixin, ListView):
-    required_roles = "admin"
-    model = SellerProduct
-    template_name = "main/admin_product_approval.html"
-
-    def get_queryset(self):
-        qs = SellerProduct.objects.annotate(
-            is_pending=Case(
-                When(status=ProductApprovalStatus.PENDING, then=Value(True)),
-                default=Value(False),
-                output_field=BooleanField()
-            )
-        ).order_by('-is_pending', '-created_at')
-        return qs
-
-
-# Admin approves a product
-class AdminConfirmProduct(LoginRequiredMixin, RoleRequiredMixin, View):
-    required_roles = "admin"
-    http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
-        product_id = kwargs.get('product_id')
-        product = get_object_or_404(SellerProduct, id=product_id)
-        product.status = ProductApprovalStatus.APPROVED
-        product.save()
-        return redirect('main:admin_product_approval')
+        requested_for = request.POST.get("requested_for")
+        total_amount = request.POST.get("total_amount")
+        rental_duration = request.POST.get("rental_duration")
 
-
-# Product list view for confirmed products
-class ProductListView(ListView):
-    model = Product
-
-
-def product_list(request):
-    products = UserProduct.objects.filter(
-        upload_type='product',
-        status='confirmed'  # or 'approved'
-    ).order_by('-created_at')
-    approved_products = products.filter(status='confirmed')  # Additional filtering if needed
-    return render(request, 'main/templates/main/products.html', {
-        'products': products,
-        'approved_products': approved_products
-    })
-
-
-# Renting list view for confirmed renting items
-class ProductRentListView(ListView):
-    model = Product
-    template_name = "main/renting.html"
-
-    def get_queryset(self):
-        qs = SellerProduct.objects.filter(
-            category=SellerProductCategory.RENTING,
-            status=ProductApprovalStatus.APPROVED
-        ).order_by('-created_at')
-        return qs
-
+        rental = RentalRequest.objects.create(
+            requested_for=requested_for,
+            user=request.user,
+        )
+        checkout_url = reverse("main:checkout", kwargs={'category': ProductCategory.RENTING})
+        return redirect(f"{checkout_url}?total_amount={total_amount}&rental_request_id={rental.id}&rental_duration={rental_duration}")
 
 # Cart
 class CartView(LoginRequiredMixin, RoleRequiredMixin, View):
@@ -386,18 +290,18 @@ class CartView(LoginRequiredMixin, RoleRequiredMixin, View):
         if self.action == 'add':
             product_id = self.item_id
             try:
-                product = SellerProduct.objects.get(id=product_id)
+                product = Product.objects.get(id=product_id)
                 cart_item, created = Cart.objects.get_or_create(user=request.user, product=product)
                 if not created:
                     cart_item.quantity += 1
                     cart_item.save()
 
                 messages.success(request, "Successfully added to cart")
-                return redirect('main:product')
+                return redirect('main:products', category=product.category)
 
-            except SellerProduct.DoesNotExist:
+            except Product.DoesNotExist:
                 messages.error(request, "Error Adding to Cart")
-                return redirect('main:product')
+                return redirect('main:products', category=ProductCategory.PRODUCT)
 
         elif self.action == 'remove':
             cart_item = get_object_or_404(Cart, id=self.item_id, user=request.user)
@@ -407,25 +311,27 @@ class CartView(LoginRequiredMixin, RoleRequiredMixin, View):
 
         if self.action is None:
             qs = Cart.objects.filter(user=self.request.user).prefetch_related("product")
-            qs = qs.annotate(
+
+            sale_products = qs.filter(product__category__in=[ProductCategory.PRODUCT, ProductCategory.THRIFT]).annotate(
                 item_total=ExpressionWrapper(
                     F('quantity') * F('product__price'),
                     output_field=DecimalField()
                 )
             )
 
-            for cart in qs:
-                print(cart.product)
+            rental_products = qs.filter(product__category=ProductCategory.RENTING).annotate(
+                item_total=ExpressionWrapper(
+                    F('quantity') * F('product__price'),
+                    output_field=DecimalField()
+                )
+            )
 
-            sale_products = [cart for cart in qs if cart.product.category == SellerProductCategory.PRODUCT]
-            rental_products = [cart for cart in qs if cart.product.category == SellerProductCategory.RENTING]
-
-            total = qs.aggregate(total_cost=Sum('item_total'))['total_cost'] or 0
-
-            print(sale_products, rental_products, total)
+            sale_products_total = sale_products.aggregate(total_cost=Sum('item_total'))['total_cost'] or 0
+            rental_products_total = rental_products.aggregate(total_cost=Sum('item_total'))['total_cost'] or 0
 
             return render(request, 'main/cart.html', {
-                "total": total,
+                "sale_products_total": sale_products_total,
+                "rental_products_total": rental_products_total,
                 "sale_products": sale_products,
                 "rental_products": rental_products,
             })
@@ -453,21 +359,28 @@ class CheckoutView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(CheckoutView, self).get_context_data(**kwargs)
-        cart_items = Cart.objects.filter(user=self.request.user)
-        qs = cart_items.annotate(
-            item_total=ExpressionWrapper(
-                F('quantity') * F('product__price'),
-                output_field=DecimalField()
+        category = self.kwargs.get('category')
+        cart_items = Cart.objects.filter(user=self.request.user, product__category=category)
+
+        if category == ProductCategory.PRODUCT:
+            qs = cart_items.annotate(
+                item_total=ExpressionWrapper(
+                    F('quantity') * F('product__price'),
+                    output_field=DecimalField()
+                )
             )
-        )
-        total = qs.aggregate(total_cost=Sum('item_total'))['total_cost'] or 0
+            total = qs.aggregate(total_cost=Sum('item_total'))['total_cost'] or 0
+        else:
+            total = self.request.GET.get('total_amount', 0)
+
         context['cart_items'] = cart_items
         context['total'] = total
         return context
 
     def post(self, request, *args, **kwargs):
+        category = self.kwargs.get('category')
         form = OrderForm(request.POST)
-        cart_items = Cart.objects.filter(user=request.user)
+        cart_items = Cart.objects.filter(user=request.user, product__category=category)
         if form.is_valid():
             try:
                 with transaction.atomic():
@@ -484,8 +397,44 @@ class CheckoutView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
                         )
 
                     cart_items.delete()
+
+                    if category == ProductCategory.RENTING:
+                        rental = get_object_or_404(RentalRequest, id=self.request.GET.get('rental_request_id'))
+                        rental.order = order
+                        rental.save()
+
+                    if order.payment_method == PaymentChoices.KHALTI:
+                        khalti_initiate_url = f'{os.getenv("KHALTI_API_ENDPOINT")}epayment/initiate/'
+                        user = self.request.user
+
+                        current_user = get_object_or_404(CustomUser, id=user.id)
+                        if self.request.user.is_authenticated:
+                            payload = json.dumps({
+                                "return_url": f'http://localhost:8000{reverse("main:checkout_success")}',
+                                "website_url": "http://localhost:800",
+                                "amount": f"{order.total_amount}",
+                                "purchase_order_id": order.id or "Order1",
+                                "purchase_order_name": order.name or "Order 1",
+                                "customer_info": {
+                                    "name": current_user.get_full_name,
+                                    "email": current_user.email or "test@khalti.com",
+                                    "phone": current_user.phone or "9800000001"
+                                }
+                            })
+
+                            headers = {
+                                'Authorization': f'key {os.getenv("KHALTI_LIVE_SECRET_KEY")}',
+                                'Content-Type': 'application/json',
+                            }
+
+                            response = requests.request("POST", khalti_initiate_url, headers=headers, data=payload)
+                            data = response.json()
+
+                            messages.success(request, "Order successfully placed, enjoy shopping...")
+                            return redirect(data["payment_url"])
+
                     messages.success(request, "Order successfully placed, enjoy shopping...")
-                    return redirect('main:product')
+                    return redirect(f"{reverse('main:checkout_success')}?order_id={order.id}")
             except Exception as e:
                 messages.error(request, "There was an error processing your order.")
                 return redirect('main:checkout')
@@ -493,3 +442,43 @@ class CheckoutView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
             messages.error(request, "Invalid Order Request")
             return redirect('main:checkout')
 
+
+class CheckoutSuccessView(LoginRequiredMixin, TemplateView):
+    template_name = "main/success.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        pidx = self.request.GET.get('pidx')
+
+        if pidx:
+            transaction_id = self.request.GET.get('transaction_id')
+            transaction_amount = self.request.GET.get('total_amount')
+            status = self.request.GET.get('status')
+            order_id = self.request.GET.get('purchase_order_id')
+            order = get_object_or_404(Order, id=order_id)
+
+            if status and status.lower() == TransactionStatus.COMPLETED:
+                order.is_paid = True
+            else:
+                order.is_paid = False
+            order.save()
+
+            try:
+                Transaction.objects.create(
+                    transaction_id=transaction_id,
+                    status=status.lower() if status else '',
+                    total_amount=Decimal(transaction_amount),
+                    order=order,
+                    pidx=pidx,
+                )
+            except Exception as e:
+                print(f"Transaction save error: {e}")
+        else:
+            order_id = self.request.GET.get('order_id')
+            order = get_object_or_404(Order, id=order_id)
+
+        context.update({
+            "order": order,
+        })
+        return context
