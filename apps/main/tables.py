@@ -48,6 +48,23 @@ class ProductTable(tables.Table):
     def render_description(self, value):
         return Truncator(value).chars(30)
 
+    def can_edit(self, record):
+        if self.category in [ProductCategory.DONATION, ProductCategory.RECYCLE, ProductCategory.THRIFT] and self.user.role == Roles.USER:
+            return record.status == ProductApprovalStatus.PENDING
+        if self.category in [ProductCategory.PRODUCT, ProductCategory.RENTING] and self.user.role == Roles.SELLER:
+            return record.status == ProductApprovalStatus.PENDING
+        return False
+
+    def can_delete(self, record):
+        if self.category in [ProductCategory.DONATION, ProductCategory.RECYCLE, ProductCategory.THRIFT] and self.user.role == Roles.USER:
+            return True
+        if self.category in [ProductCategory.PRODUCT, ProductCategory.RENTING] and self.user.role == Roles.SELLER:
+            return True
+        return False
+
+    def can_approve_or_reject(self, record):
+        return self.user and self.user.role not in [Roles.SELLER, Roles.USER] and record.status == ProductApprovalStatus.PENDING
+
     def render_actions(self, record):
         delete_url = reverse_lazy('main:product_delete', kwargs={'category': self.category, 'id': record.id})
         edit_url = reverse_lazy('main:product_edit', kwargs={'category': self.category, 'id': record.id})
@@ -55,17 +72,15 @@ class ProductTable(tables.Table):
         reject_url = reverse_lazy('main:product_reject', kwargs={'id': record.id})
         view_url = reverse_lazy('main:dashboard_product_detail', kwargs={'category': self.category, 'pk': record.id})
 
-        buttons = ""
+        buttons = f'<a href="{view_url}" class="btn btn-sm btn-info me-2 mb-2">View</a>'
 
-        buttons += f'<a href="{view_url}" class="btn btn-sm btn-info me-2 mb-2">View</a>'
+        if self.can_edit(record):
+            buttons += f'<a href="{edit_url}" class="btn btn-sm btn-primary me-2 mb-2">Edit</a>'
 
-        if self.category in [ProductCategory.DONATION, ProductCategory.RECYCLE, ProductCategory.THRIFT] and self.user.role == Roles.USER:
-            if record.status == ProductApprovalStatus.PENDING:
-                buttons += f'<a href="{edit_url}" class="btn btn-sm btn-primary me-2 mb-2">Edit</a>'
+        if self.can_delete(record):
             buttons += f'<a href="{delete_url}" class="btn btn-sm btn-danger me-2 mb-2">Delete</a>'
 
-        if self.user and self.user.role not in [Roles.SELLER,
-                                                Roles.USER] and record.status == ProductApprovalStatus.PENDING:
+        if self.can_approve_or_reject(record):
             buttons += f'<a href="{approve_url}" class="btn btn-sm btn-success me-2 mb-2">Approve</a>'
             buttons += f'<a href="{reject_url}" class="btn btn-sm btn-warning mb-2">Reject</a>'
 
@@ -78,7 +93,7 @@ class ProductTable(tables.Table):
 
 class RentalRequestTable(tables.Table):
     def __init__(self, *args, **kwargs):
-        exclude_fields = ['id', 'order']
+        exclude_fields = ['id', 'order', "status"]
         kwargs['exclude'] = kwargs.get('exclude', []) + exclude_fields
         super().__init__(*args, **kwargs)
 

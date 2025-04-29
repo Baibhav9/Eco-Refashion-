@@ -3,6 +3,7 @@
 {% block title %}Checkout{% endblock %}
 
 {% block extra_css %}
+    <!-- No custom styles needed, everything will be done via Bootstrap -->
 {% endblock %}
 
 {% block content %}
@@ -69,6 +70,35 @@
                                             <img src="{% static 'images/khalti.png' %}" alt="Khalti Payment Gateway"
                                                  class="img-fluid"/>
                                         </div>
+                                    </div>
+
+                                    <!-- Shipping Address Section -->
+                                    <hr class="my-4">
+                                    <h4 class="mt-4 mb-3">Shipping Address</h4>
+
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="name" name="full_name" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="address" class="form-label">Address</label>
+                                        <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="phone" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone_number" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="city" class="form-label">City</label>
+                                        <input type="text" class="form-control" id="city" name="city" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="postal_code" class="form-label">Postal Code</label>
+                                        <input type="text" class="form-control" id="postal_code" name="postal_code" required>
                                     </div>
 
                                     <button type="submit" class="btn btn-success w-100">

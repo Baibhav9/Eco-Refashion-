@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import RentalRequest, Cart, Product, Order, OrderItem
+from .models import RentalRequest, Cart, Product, Order, OrderItem, Transaction
 from django.shortcuts import render
 
 class ProductAdmin(admin.ModelAdmin):
@@ -13,7 +13,7 @@ class ProductAdmin(admin.ModelAdmin):
     # Field organization for add/edit forms
     fieldsets = (
         (None, {
-            'fields': ('seller', 'title', 'description')
+            'fields': ('user', 'title', 'description')
         }),
         ('Details', {
             'fields': ('category', 'price', 'available_size', 'color')
@@ -68,3 +68,5 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(Cart)
 admin.site.register(Order)
 admin.site.register(OrderItem)
+admin.site.register(RentalRequest)
+admin.site.register(Transaction)

@@ -33,11 +33,11 @@ class RentalRequest(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     order = models.ForeignKey('Order', on_delete=models.CASCADE, null=True, blank=True)
     status = models.CharField(max_length=20, choices=ProductApprovalStatus.choices, default=ProductApprovalStatus.PENDING)
-    requested_date = models.DateTimeField(auto_now_add=True)
-    requested_for = models.DateTimeField(null=True, blank=True)
+    requested_date = models.DateField(auto_now_add=True)
+    requested_for = models.DateField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.order.name} ({self.status})"
+        return f"{self.user.username} - {self.order} ({self.status})"
 
 
 class Transaction(models.Model):
@@ -61,6 +61,12 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=10, choices=PaymentChoices.choices)
     is_paid = models.BooleanField(default=False)
     ordered_at = models.DateTimeField(auto_now_add=True)
+
+    full_name = models.CharField(max_length=255)
+    address = models.TextField()
+    phone_number = models.CharField(max_length=255)
+    city = models.CharField(max_length=255)
+    postal_code = models.CharField(max_length=255)
 
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"

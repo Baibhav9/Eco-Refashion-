@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const pickupPhoneGroup = pickupPhoneInput?.closest('div');
 
     function togglePickupFields() {
-        if (deliveryOption.value === 'pickup') {
+        if (deliveryOption?.value === 'pickup') {
             pickupAddressGroup?.classList.remove('d-none');
             pickupPhoneGroup?.classList.remove('d-none');
         } else {

@@ -134,21 +134,26 @@ class UserDashboardView(LoginRequiredMixin, TemplateView):
             pending_uploads = Product.objects.filter(user=self.request.user,
                                                       category__in=[ProductCategory.PRODUCT, ProductCategory.RENTING],
                                                       status=ProductApprovalStatus.PENDING).count()
+            declined_uploads = Product.objects.filter(user=self.request.user,category__in=[ProductCategory.PRODUCT, ProductCategory.RENTING],
+                                                      status=ProductApprovalStatus.DECLINED).count()
 
             context.update({
                 'total_uploads': total_uploads,
                 'approved_uploads': approved_uploads,
                 'pending_uploads': pending_uploads,
+                'declined_uploads': declined_uploads
             })
         elif self.request.user.role == Roles.ORGANIZATION:
             total_donation_received = Product.objects.filter(category=ProductCategory.DONATION).count()
             total_recycles_received = Product.objects.filter(category=ProductCategory.RECYCLE).count()
             pending_donations = Product.objects.filter(category=ProductCategory.DONATION, status=ProductApprovalStatus.PENDING).count()
+            pending_recycles = Product.objects.filter(category=ProductCategory.RECYCLE, status=ProductApprovalStatus.PENDING).count()
 
             context.update({
                 'total_donation_received': total_donation_received,
                 'total_recycles_received': total_recycles_received,
                 'pending_donations': pending_donations,
+                'pending_recycles': pending_recycles,
             })
         else:
             total_products = Product.objects.filter(category=ProductCategory.PRODUCT).count()
@@ -157,6 +162,8 @@ class UserDashboardView(LoginRequiredMixin, TemplateView):
             total_approved_products = Product.objects.filter(category=ProductCategory.PRODUCT, status=ProductApprovalStatus.APPROVED).count()
             total_approved_rentals = Product.objects.filter(category=ProductCategory.RENTING, status=ProductApprovalStatus.APPROVED).count()
             total_approved_thrifts = Product.objects.filter(category=ProductCategory.THRIFT, status=ProductApprovalStatus.APPROVED).count()
+            total_pendings = Product.objects.filter(category__in=[ProductCategory.PRODUCT, ProductCategory.RENTING, ProductCategory.THRIFT], status=ProductApprovalStatus.PENDING).count()
+            total_declined= Product.objects.filter(category__in=[ProductCategory.PRODUCT, ProductCategory.RENTING, ProductCategory.THRIFT], status=ProductApprovalStatus.DECLINED).count()
 
             context.update({
                 'total_products': total_products,
@@ -165,6 +172,8 @@ class UserDashboardView(LoginRequiredMixin, TemplateView):
                 'total_approved_products': total_approved_products,
                 'total_approved_rentals': total_approved_rentals,
                 'total_approved_thrifts': total_approved_thrifts,
+                'total_pendings': total_pendings,
+                'total_declined': total_declined
             })
         return context
 
@@ -383,7 +392,7 @@ class RentalRequestView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         cart_items = Cart.objects.prefetch_related("product").filter(user=self.request.user,
-        product__category=ProductCategory.RENTING)
+                                                                     product__category=ProductCategory.RENTING)
 
         context.update({
             "cart_items": cart_items,
@@ -507,8 +516,10 @@ class CheckoutView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         category = self.kwargs.get('category')
+        print(request.POST)
         form = OrderForm(request.POST)
         cart_items = Cart.objects.filter(user=request.user, product__category=category)
+
         if form.is_valid():
             try:
                 with transaction.atomic():
@@ -565,10 +576,10 @@ class CheckoutView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
                     return redirect(f"{reverse('main:checkout_success')}?order_id={order.id}")
             except Exception as e:
                 messages.error(request, "There was an error processing your order.")
-                return redirect('main:checkout')
+                return redirect('main:checkout', category)
         else:
             messages.error(request, "Invalid Order Request")
-            return redirect('main:checkout')
+            return redirect('main:checkout', category)
 
 
 class CheckoutSuccessView(LoginRequiredMixin, TemplateView):
@@ -610,3 +621,16 @@ class CheckoutSuccessView(LoginRequiredMixin, TemplateView):
             "order": order,
         })
         return context
+
+# Errors
+def error_400(request, exception=None):
+    return render(request, 'errors/400.html', status=400)
+
+def error_403(request, exception=None):
+    return render(request, 'errors/403.html', status=403)
+
+def error_404(request, exception=None):
+    return render(request, 'errors/404.html', status=404)
+
+def error_500(request):
+    return render(request, 'errors/500.html', status=500)

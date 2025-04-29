@@ -7,6 +7,8 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, CreateView, UpdateView
 
 from .forms import CustomUserCreationForm, LoginForm, CustomUserChangeForm
+from ..main.constants import Roles
+
 
 class RegisterView(CreateView):
     template_name = "accounts/register.html"
@@ -29,8 +31,12 @@ class RegisterView(CreateView):
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
+        post_data = request.POST.copy()
 
-        form = CustomUserCreationForm(request.POST, request.FILES)
+        if 'role' not in post_data:
+            post_data['role'] = Roles.USER
+
+        form = CustomUserCreationForm(post_data, request.FILES)
 
         if form.is_valid():
             user = form.save()
