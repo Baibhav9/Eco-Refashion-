@@ -383,7 +383,7 @@ class RentalRequestView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         cart_items = Cart.objects.prefetch_related("product").filter(user=self.request.user,
-                                                                     product__category=ProductCategory.RENTING)
+        product__category=ProductCategory.RENTING)
 
         context.update({
             "cart_items": cart_items,
