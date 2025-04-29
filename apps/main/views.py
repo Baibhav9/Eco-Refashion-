@@ -1,3 +1,4 @@
+import csv
 import json
 import os
 from decimal import Decimal
@@ -14,7 +15,7 @@ from django.views.generic import TemplateView, CreateView, ListView, View, Detai
 from django_tables2 import SingleTableView
 
 from .constants import ProductApprovalStatus, Roles, ProductCategory, PRODUCT_CATEGORY_LIST, PaymentChoices, \
-    TransactionStatus
+    TransactionStatus, ProductDeliveryOption
 from .models import Cart, RentalRequest, Product, OrderItem, Order, Transaction
 from .forms import ProductForm, OrderForm
 
@@ -110,6 +111,63 @@ class ProductDetailView(DetailView):
 class UserDashboardView(LoginRequiredMixin, TemplateView):
     template_name = "main/dashboard/dashboard.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.role == Roles.USER:
+            total_orders = Order.objects.filter(user=self.request.user).count()
+            total_donations = Product.objects.filter(user=self.request.user, category=ProductCategory.DONATION).count()
+            total_thrifts = Product.objects.filter(user=self.request.user, category=ProductCategory.THRIFT).count()
+            total_recycles = Product.objects.filter(user=self.request.user, category=ProductCategory.RECYCLE).count()
+
+            context.update({
+                'total_orders': total_orders,
+                'total_donations': total_donations,
+                'total_thrifts': total_thrifts,
+                'total_recycles': total_recycles,
+            })
+        elif self.request.user.role == Roles.SELLER:
+            total_uploads = Product.objects.filter(user=self.request.user, category__in=[ProductCategory.PRODUCT,
+                                                                                         ProductCategory.RENTING]).count()
+            approved_uploads = Product.objects.filter(user=self.request.user,
+                                                      category__in=[ProductCategory.PRODUCT, ProductCategory.RENTING],
+                                                      status=ProductApprovalStatus.APPROVED).count()
+            pending_uploads = Product.objects.filter(user=self.request.user,
+                                                      category__in=[ProductCategory.PRODUCT, ProductCategory.RENTING],
+                                                      status=ProductApprovalStatus.PENDING).count()
+
+            context.update({
+                'total_uploads': total_uploads,
+                'approved_uploads': approved_uploads,
+                'pending_uploads': pending_uploads,
+            })
+        elif self.request.user.role == Roles.ORGANIZATION:
+            total_donation_received = Product.objects.filter(category=ProductCategory.DONATION).count()
+            total_recycles_received = Product.objects.filter(category=ProductCategory.RECYCLE).count()
+            pending_donations = Product.objects.filter(category=ProductCategory.DONATION, status=ProductApprovalStatus.PENDING).count()
+
+            context.update({
+                'total_donation_received': total_donation_received,
+                'total_recycles_received': total_recycles_received,
+                'pending_donations': pending_donations,
+            })
+        else:
+            total_products = Product.objects.filter(category=ProductCategory.PRODUCT).count()
+            total_rentals = Product.objects.filter(category=ProductCategory.RENTING).count()
+            total_thrifts_admin = Product.objects.filter(category=ProductCategory.THRIFT).count()
+            total_approved_products = Product.objects.filter(category=ProductCategory.PRODUCT, status=ProductApprovalStatus.APPROVED).count()
+            total_approved_rentals = Product.objects.filter(category=ProductCategory.RENTING, status=ProductApprovalStatus.APPROVED).count()
+            total_approved_thrifts = Product.objects.filter(category=ProductCategory.THRIFT, status=ProductApprovalStatus.APPROVED).count()
+
+            context.update({
+                'total_products': total_products,
+                'total_rentals': total_rentals,
+                'total_thrifts_admin': total_thrifts_admin,
+                'total_approved_products': total_approved_products,
+                'total_approved_rentals': total_approved_rentals,
+                'total_approved_thrifts': total_approved_thrifts,
+            })
+        return context
+
 
 class OrderListView(LoginRequiredMixin, SingleTableView):
     model = Order
@@ -133,7 +191,10 @@ class ProductCategoryListView(LoginRequiredMixin, SingleTableView):
 
     def get_queryset(self):
         category = self.kwargs['category']
-        return Product.objects.filter(category=category).order_by('-created_at')
+        qs = Product.objects.filter(category=category)
+        if self.request.user.role == Roles.USER:
+            qs = qs.filter(user=self.request.user)
+        return qs.order_by('-created_at')
 
     def get_context_data(self, **kwargs: None):
         context = super().get_context_data(**kwargs)
@@ -151,6 +212,61 @@ class ProductCategoryListView(LoginRequiredMixin, SingleTableView):
         kwargs["category"] = self.kwargs['category']
         kwargs['user'] = self.request.user
         return kwargs
+
+class ImportCSVView(View):
+    model_mapping = {
+        'product': Product,
+        'rental': Product,
+    }
+
+    def post(self, request, title, *args, **kwargs):
+        csv_file = request.FILES.get('csv_file')
+        if not csv_file:
+            messages.error(request, "No file uploaded.")
+            return redirect(request.META.get('HTTP_REFERER'))
+
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, "Uploaded file is not a CSV.")
+            return redirect(request.META.get('HTTP_REFERER'))
+
+        model = self.model_mapping.get(title)
+        if not model:
+            messages.error(request, "Invalid import category.")
+            return redirect(request.META.get('HTTP_REFERER'))
+
+        try:
+            decoded_file = csv_file.read().decode('utf-8').splitlines()
+            reader = csv.DictReader(decoded_file)
+
+            for row in reader:
+                obj = model.objects.create(
+                    title=row.get('title'),
+                    description=row.get('description'),
+                    price=row.get('price') or 0,
+                    user=request.user,
+                    available_size=row.get('available_size') or 'L',
+                    stock_amount=row.get('stock_amount') or 0,
+                    color=row.get('color'),
+                    category=title,
+                )
+            messages.success(request, "CSV imported successfully.")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {e}")
+
+        return redirect(request.META.get('HTTP_REFERER'))
+
+class ProductCategoryDetailView(LoginRequiredMixin, DetailView):
+    model = Product
+    template_name = "main/dashboard/dashboard_product_detail.html"
+    context_object_name = "product"
+
+    def get_queryset(self):
+        category = self.kwargs.get('category')
+        return Product.objects.filter(category=category)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
 
 class ProductCategoryCreateView(LoginRequiredMixin, CreateView):
@@ -221,10 +337,12 @@ class ProductCategoryUpdateView(LoginRequiredMixin, UpdateView):
         kwargs["category"] = self.kwargs['category']
         return kwargs
 
+
 class RentalRequestListView(LoginRequiredMixin, SingleTableView):
     model = RentalRequest
     template_name = "main/dashboard/list_table.html"
     table_class = RentalRequestTable
+
 
 class ProductCategoryDeleteView(LoginRequiredMixin, DeleteView):
     model = Product
@@ -249,6 +367,14 @@ class ProductApproveView(LoginRequiredMixin, View):
         messages.success(request, f"Product with id {product.id} successfully approved.")
         return redirect("main:product_by_category", category=product.category)
 
+class ProductRejectView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        product_id = self.kwargs['id']
+        product = get_object_or_404(Product, id=product_id)
+        product.status = ProductApprovalStatus.DECLINED
+        product.save()
+        messages.success(request, f"Product with id {product.id} successfully declined.")
+        return redirect("main:product_by_category", category=product.category)
 
 class RentalRequestView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
     required_roles = Roles.USER
@@ -256,14 +382,14 @@ class RentalRequestView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        cart_items = Cart.objects.prefetch_related("product").filter(user=self.request.user, product__category=ProductCategory.RENTING)
+        cart_items = Cart.objects.prefetch_related("product").filter(user=self.request.user,
+                                                                     product__category=ProductCategory.RENTING)
 
         context.update({
             "cart_items": cart_items,
         })
 
         return context
-
 
     def post(self, request, *args, **kwargs):
         requested_for = request.POST.get("requested_for")
@@ -275,7 +401,9 @@ class RentalRequestView(LoginRequiredMixin, RoleRequiredMixin, TemplateView):
             user=request.user,
         )
         checkout_url = reverse("main:checkout", kwargs={'category': ProductCategory.RENTING})
-        return redirect(f"{checkout_url}?total_amount={total_amount}&rental_request_id={rental.id}&rental_duration={rental_duration}")
+        return redirect(
+            f"{checkout_url}?total_amount={total_amount}&rental_request_id={rental.id}&rental_duration={rental_duration}")
+
 
 # Cart
 class CartView(LoginRequiredMixin, RoleRequiredMixin, View):
