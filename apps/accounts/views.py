@@ -7,8 +7,6 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, CreateView, UpdateView
 
 from .forms import CustomUserCreationForm, LoginForm, CustomUserChangeForm
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
-
 
 class RegisterView(CreateView):
     template_name = "accounts/register.html"

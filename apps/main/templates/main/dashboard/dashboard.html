@@ -1,10 +1,317 @@
 {% extends 'dashboard_base.html' %}
-
 {% load render_table from django_tables2 %}
 
 {% block dashboard_content %}
     <div class="container mt-5">
-        <h1>Dashboard</h1>
+        <h1 class="mb-4 fw-bold">Dashboard Overview</h1>
+
+        {% if request.user.role == "user" %}
+        <!-- User Role - Stats (Orders, Donations, Thrifts, Recycles) -->
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Orders</h5>
+                        <h2 class="card-text">{{ total_orders }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Donated Clothes</h5>
+                        <h2 class="card-text">{{ total_donations }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Thrifted Clothes</h5>
+                        <h2 class="card-text">{{ total_thrifts }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Recycled Clothes</h5>
+                        <h2 class="card-text">{{ total_recycles }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clothes Distribution Chart -->
+        <div class="row mt-5">
+            <div class="col-lg-6 mx-auto">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title text-center mb-4">Clothes Distribution</h5>
+                        <canvas id="clothesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            window.addEventListener("DOMContentLoaded", function () {
+                const ctx = document.getElementById('clothesChart').getContext('2d');
+                const clothesChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Donated', 'Thrifted', 'Recycled'],
+                        datasets: [{
+                            label: 'Clothes',
+                            data: [{{ total_donations }}, {{ total_thrifts }}, {{ total_recycles }}],
+                            backgroundColor: [
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                            ],
+                            borderColor: [
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+
+        {% elif request.user.role == "seller" %}
+        <!-- Seller Role - Stats (Products and Rentals) -->
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total Uploads</h5>
+                        <h2 class="card-text">{{ total_uploads }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Approved Uploads</h5>
+                        <h2 class="card-text">{{ approved_uploads }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Pending Uploads</h5>
+                        <h2 class="card-text">{{ pending_uploads }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product and Rental Status Chart -->
+        <div class="row mt-5">
+            <div class="col-lg-6 mx-auto">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title text-center mb-4">Product & Rental Status</h5>
+                        <canvas id="productRentalChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            window.addEventListener("DOMContentLoaded", function () {
+                const ctx = document.getElementById('productRentalChart').getContext('2d');
+                const productRentalChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Approved', 'Pending'],
+                        datasets: [{
+                            label: 'Uploads',
+                            data: [{{ approved_uploads }}, {{ pending_uploads }}],
+                            backgroundColor: [
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(255, 159, 64, 0.7)',
+                            ],
+                            borderColor: [
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(255, 159, 64, 1)',
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+
+        {% elif request.user.role == "organization" %}
+        <!-- Organization Role - Stats (Received Donations, Recycled Clothes) -->
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Received Donations</h5>
+                        <h2 class="card-text">{{ total_donation_received }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Received Recycled Clothes</h5>
+                        <h2 class="card-text">{{ total_recycles_received }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Pending Donations</h5>
+                        <h2 class="card-text">{{ pending_donations }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Donations and Recyles Status Chart -->
+        <div class="row mt-5">
+            <div class="col-lg-6 mx-auto">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title text-center mb-4">Donations & Recycles Status</h5>
+                        <canvas id="donationRecycleChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            window.addEventListener("DOMContentLoaded", function () {
+                const ctx = document.getElementById('donationRecycleChart').getContext('2d');
+                const donationRecycleChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Pending', 'Approved'],
+                        datasets: [{
+                            label: 'Donations & Recycles',
+                            data: [{{ pending_donations }}, {{ total_donation_received }}],
+                            backgroundColor: [
+                                'rgba(255, 159, 64, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                            ],
+                            borderColor: [
+                                'rgba(255, 159, 64, 1)',
+                                'rgba(54, 162, 235, 1)',
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+
+        {% elif request.user.role == "admin" %}
+        <!-- Admin Role - Stats (Approve Products, Rentals, Thrifted) -->
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total Products</h5>
+                        <h2 class="card-text">{{ total_products }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total Rentals</h5>
+                        <h2 class="card-text">{{ total_rentals }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total Thrifted</h5>
+                        <h2 class="card-text">{{ total_thrifts_admin }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approval Stats Chart -->
+        <div class="row mt-5">
+            <div class="col-lg-6 mx-auto">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title text-center mb-4">Approval Stats</h5>
+                        <canvas id="approvalStatsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            window.addEventListener("DOMContentLoaded", function () {
+                const ctx = document.getElementById('approvalStatsChart').getContext('2d');
+                const approvalStatsChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Products', 'Rentals', 'Thrifted'],
+                        datasets: [{
+                            label: 'Approval Stats',
+                            data: [{{ total_approved_products }}, {{ total_approved_rentals }}, {{ total_approved_thrifts }}],
+                            backgroundColor: [
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(153, 102, 255, 0.7)',
+                                'rgba(255, 159, 64, 0.7)',
+                            ],
+                            borderColor: [
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)',
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+        {% endif %}
     </div>
 {% endblock %}
-

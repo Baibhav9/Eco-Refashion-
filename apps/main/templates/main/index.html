@@ -52,18 +52,18 @@
         </div>
     </section>
 
-    {% if request.user.role == "user" %}
-        <section class="py-5">
-            <div class="container">
-                <h2 class="mb-4"><i class="fas fa-recycle me-2"></i>Thrifted Finds</h2>
-                <div class="row g-4">
-                    {% for product in thrifts %}
-                        {% include "main/includes/product_card.html" with obj=product %}
-                    {% empty %}
-                        <p class="text-muted">No thrifted items available right now.</p>
-                    {% endfor %}
-                </div>
-            </div>
-        </section>
-    {% endif %}
+{#    {% if request.user.role == "user" %}#}
+{#        <section class="py-5">#}
+{#            <div class="container">#}
+{#                <h2 class="mb-4"><i class="fas fa-recycle me-2"></i>Thrifted Finds</h2>#}
+{#                <div class="row g-4">#}
+{#                    {% for product in thrifts %}#}
+{#                        {% include "main/includes/product_card.html" with obj=product %}#}
+{#                    {% empty %}#}
+{#                        <p class="text-muted">No thrifted items available right now.</p>#}
+{#                    {% endfor %}#}
+{#                </div>#}
+{#            </div>#}
+{#        </section>#}
+{#    {% endif %}#}
 {% endblock %}

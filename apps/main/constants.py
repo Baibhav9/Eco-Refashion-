@@ -1,6 +1,7 @@
 from django.db.models import TextChoices
 
 class Roles(TextChoices):
+    SUPER_ADMIN = "super admin"
     USER = "user"
     ADMIN = "admin"
     ORGANIZATION = "organization"

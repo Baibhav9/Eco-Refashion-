@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Product Detail{% endblock %}
+
+{% block content %}
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row justify-content-center">
+
+                <div class="col-lg-8">
+                    <div class="card shadow-sm border-0">
+                        <div class="row g-0">
+
+                            {% if product.image %}
+                                <div class="col-md-5">
+                                    <img src="{{ product.image.url }}" class="img-fluid rounded-start"
+                                         alt="{{ product.name }}">
+                                </div>
+                            {% endif %}
+
+                            <div class="col-md-7">
+                                <div class="card-body p-4">
+                                    <h3 class="card-title mb-3">{{ product.name }}</h3>
+
+                                    {% if product.price %}
+                                        <h5 class="text-success mb-3">Rs. {{ product.price }}</h5>
+                                    {% endif %}
+
+                                    <p class="card-text mb-3">
+                                        {{ product.description }}
+                                    </p>
+
+                                    <ul class="list-unstyled mb-4">
+                                        <li><strong>Category:</strong> {{ product.get_category_display }}</li>
+                                        <li><strong>Status:</strong> {{ product.get_status_display }}</li>
+                                        <li><strong>Condition:</strong> {{ product.condition }}</li>
+                                        {% if product.pickup_address %}
+                                            <li><strong>Pickup Address:</strong> {{ product.pickup_address }}</li>
+                                        {% endif %}
+                                        {% if product.pickup_phone %}
+                                            <li><strong>Pickup Phone:</strong> {{ product.pickup_phone }}</li>
+                                        {% endif %}
+                                    </ul>
+
+                                    <a href="{% url 'main:product_by_category' product.category %}" class="btn btn-outline-primary">Back to
+                                        Products</a>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+{% endblock %}

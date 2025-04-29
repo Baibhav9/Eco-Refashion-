@@ -5,7 +5,8 @@ from .constants import ProductCategory
 from .views import IndexView, ProductsView, UserDashboardView, CartView, CheckoutView, RentalRequestView, \
     ProductDetailView, OrderListView, \
     ProductCategoryListView, ProductCategoryCreateView, ProductCategoryDeleteView, ProductCategoryUpdateView, \
-    ProductApproveView, CheckoutSuccessView, RentalRequestListView
+    ProductApproveView, CheckoutSuccessView, RentalRequestListView, ProductCategoryDetailView, ImportCSVView, \
+    ProductRejectView
 
 app_name = 'main'
 
@@ -19,9 +20,12 @@ product_paths = [
 dashboard_paths = [
     path('dashboard', UserDashboardView.as_view(), name='dashboard'),
     path("dashboard/orders", OrderListView.as_view(), name='orders'),
+    path('product/<str:category>/<int:pk>/', ProductCategoryDetailView.as_view(), name='dashboard_product_detail'),
+    path('import-csv/<str:title>/', ImportCSVView.as_view(), name='import_csv'),
     path("dashboard/create/<str:category>", ProductCategoryCreateView.as_view(), name='create'),
     path("dashboard/<str:category>/", ProductCategoryListView.as_view(), name="product_by_category"),
     path("dashboard/product/approve/<int:id>", ProductApproveView.as_view(), name='product_approve'),
+    path("dashboard/product/reject/<int:id>", ProductRejectView.as_view(), name='product_reject'),
     path("dashboard/rental-requests", RentalRequestListView.as_view(), name='user_rental_requests'),
 ]
 

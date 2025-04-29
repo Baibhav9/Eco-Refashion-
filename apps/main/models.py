@@ -22,7 +22,7 @@ class Product(models.Model):
     category = models.CharField(max_length=25, choices=ProductCategory.choices)
     stock_amount = models.PositiveIntegerField(default=1)
 
-    delivery_option = models.CharField(max_length=50, blank=True, null=True, choices=ProductDeliveryOption.choices)
+    delivery_option = models.CharField(max_length=50, blank=True, null=True, choices=ProductDeliveryOption.choices, default=ProductDeliveryOption.DROPOFF)
     pickup_address = models.CharField(max_length=255, default='Baneshwor, Kathmandu')
     pickup_phone = models.CharField(max_length=255, default="9800000000")
 
